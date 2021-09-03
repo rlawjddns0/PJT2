@@ -39,7 +39,7 @@ class makePath(Node):
         
         '''
         #full_path='C:\\Users\\multicampus\\Desktop\\ros2\\skeleton-project\\ros2_smart_home\\sub1\\path\\test.txt'
-        self.f=open('C:\\Users\\multicampus\\Desktop\\ros2\\skeleton-project\\ros2_smart_home\\sub1\\path\\test.txt','w')
+        self.f=open('C:\\Users\\multicampus\\Desktop\\rosgit\\S05P21B202\\ros2_smart_home\\sub1\\path\\test.txt','w')
         
         
         self.is_odom=True

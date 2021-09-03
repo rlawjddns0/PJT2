@@ -22,8 +22,11 @@ import os
 # 6. local_path 예외 처리
 # 7. global_path 업데이트 주기 재설정
 
-
+global prev_idx
+prev_idx = 0
 class pathPub(Node):
+
+    
 
     def __init__(self):
         super().__init__('path_pub')
@@ -47,7 +50,7 @@ class pathPub(Node):
         '''
 
         #full_path= 
-        self.f= open('C:\\Users\\multicampus\\Desktop\\ros2\\skeleton-project\\ros2_smart_home\\sub1\\path\\test.txt','r')
+        self.f= open('C:\\Users\\multicampus\\Desktop\\rosgit\\S05P21B202\\ros2_smart_home\\sub1\\path\\test.txt','r')
 
 
         '''
@@ -76,6 +79,7 @@ class pathPub(Node):
         self.odom_msg=msg
 
     def timer_callback(self):
+        global prev_idx
         if self.is_odom ==True:
 
             local_path_msg=Path()
@@ -85,16 +89,21 @@ class pathPub(Node):
             y=self.odom_msg.pose.pose.position.y
             print(x,y)
             current_waypoint=-1
-            
+            print(prev_idx)
+            print("여기요 여기")
             #로직 5. global_path 중 로봇과 가장 가까운 포인트 계산
-
+            
             min_dis=float('inf')
             for i,waypoint in enumerate(self.global_path_msg.poses) :
+                if i > prev_idx + 15  or i < prev_idx - 15 :
+                    continue
 
                 distance=sqrt(pow(x-waypoint.pose.position.x,2)+pow(y-waypoint.pose.position.y,2))
                 if distance < min_dis :
                     min_dis=distance
                     current_waypoint=i
+                    prev_idx=current_waypoint
+                    
             
             
             #로직 6. local_path 예외 처리
