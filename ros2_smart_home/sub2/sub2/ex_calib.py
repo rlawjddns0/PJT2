@@ -262,20 +262,18 @@ class LIDAR2CAMTransform:
         xyi=np.zeros((xyz_c.shape[0], 2))
 
         # 로직 3. RT로 좌표 변환된 포인트들의 normalizing plane 상의 위치를 계산.
-        # xn, yn = 
+        xc, yc, zc = xyz_c[0,:].reshape([1,-1]), xyz_c[1,:].reshape([1,-1]), xyz_c[2,:].reshape([1,-1])
+        xn, yn = xc/(zc+0.0001), yc/(zc+0.0001)
 
         # 로직 4. normalizing plane 상의 라이다 포인트들에 proj_mtx를 곱해 픽셀 좌표값 계산.
+        xyi = np.matmul(self.proj_mtx, np.concatenate([xn, yn, np.ones_like(xn)], axis=0))
 
-        # xyi = np.matmul(self.proj_mtx, np.concatenate([xn, yn, np.ones_like(xn)], axis=0))
-
-        """
         # 로직 5. 이미지 프레임 밖을 벗어나는 포인트들을 crop.
-
         if crop:
-            xyi = 
+            xyi = self.crop_pts(xyi)
         else:
             pass
-        """
+        
         return xyi
 
     def crop_pts(self, xyi):
