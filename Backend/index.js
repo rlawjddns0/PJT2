@@ -1,24 +1,20 @@
 const express=require('express');
 const app=express();
 const port=5000
-const bodyParser=require('body-parser')
 const mongoose=require('mongoose');
 const { User } = require('./models/User');
 
+const config=require('./config/key')
+
+
+app.use(express.urlencoded({extended: true}));
+app.use(express.json())
 
 
 
 
 
-app.use(bodyParser.urlencoded({extended:true}));
-
-app.use(bodyParser.json())
-
-
-
-
-
-mongoose.connect('mongodb+srv://jeongwoon:%40tkarnr12@cluster0.j3yib.mongodb.net/myFirstDatabase?retryWrites=true&w=majority',{
+mongoose.connect(config.mongoURI,{
 }).then(()=>console.log("Mongodb Connected"))
     .catch(err=>console.log(err));
 
