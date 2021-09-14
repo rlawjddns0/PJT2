@@ -10,21 +10,6 @@ const StyledText = styled.Text`
     font-size: 30px;
 `;
 
-export const Home = () => {
-    return (
-        <Container>
-            <StyledText>Home</StyledText>
-        </Container>
-    )
-}
-
-export const Meet = () => {
-    return (
-        <Container>
-            <StyledText>Test</StyledText>
-        </Container>
-    )
-}
 export const Settings = () => {
     return (
         <Container>
@@ -32,3 +17,5 @@ export const Settings = () => {
         </Container>
     )
 }
+
+export default Settings;
