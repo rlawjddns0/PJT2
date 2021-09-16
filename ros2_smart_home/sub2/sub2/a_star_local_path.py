@@ -16,7 +16,8 @@ from math import pi,cos,sin,sqrt
 # 4. global_path 중 로봇과 가장 가까운 포인트 계산
 # 5. local_path 예외 처리
 
-
+global current_waypoint_idx
+current_waypoint_idx = 0
 class astarLocalpath(Node):
 
     def __init__(self):
@@ -28,7 +29,6 @@ class astarLocalpath(Node):
         self.odom_msg=Odometry()
         self.is_odom=False
         self.is_path=False
-       
         self.global_path_msg=Path()
 
 
@@ -45,19 +45,16 @@ class astarLocalpath(Node):
 
 
     def path_callback(self,msg):
-        pass
-        '''
-        로직 2. global_path 데이터 수신 후 저장
+        # 로직 2. global_path 데이터 수신 후 저장
 
-        self.is_path=
-        self.global_path_msg=
+        self.is_path = True
+        self.global_path_msg = msg
         
-        '''
 
         
     def timer_callback(self):
+        global current_waypoint_idx
         if self.is_odom and self.is_path ==True:
-            
             local_path_msg=Path()
             local_path_msg.header.frame_id='/map'
             
@@ -65,32 +62,35 @@ class astarLocalpath(Node):
             y=self.odom_msg.pose.pose.position.y
             current_waypoint=-1
             
-            '''
-            로직 4. global_path 중 로봇과 가장 가까운 포인트 계산
             
-            min_dis=
-            for i,waypoint in enumerate(self.global_path_msg.poses) : 
-                distance=
-                if distance < min_dis :
-                    min_dis=
-                    current_waypoint=
+            # 로직 4. global_path 중 로봇과 가장 가까운 포인트 계산
+            
+            min_dis=float('inf')
 
-            '''           
-            
-            
-            '''
-            로직 5. local_path 예외 처리
+            for i,waypoint in enumerate(self.global_path_msg.poses):
+                if i > current_waypoint_idx + 15 or i < current_waypoint_idx - 15:
+                    continue
+                distance = sqrt(pow(x-waypoint.pose.position.x, 2) + pow(y-waypoint.pose.position.y, 2))
+                if distance < min_dis:
+                    min_dis = distance
+                    current_waypoint = i
+                    current_waypoint_idx = current_waypoint
+
+   
+            # 로직 5. local_path 예외 처리
 
             if current_waypoint != -1 : 
                 if current_waypoint + self.local_path_size < len(self.global_path_msg.poses):
-                    
-                    
-                
+                    endpoint = current_waypoint + self.local_path_size
                 else :
+                    endpoint = len(self.global_path_msg.poses)
 
-                    
-                              
-            '''           
+                for num in range(current_waypoint, endpoint):
+                    tmp_pose = PoseStamped()
+                    tmp_pose.pose.position.x = self.global_path_msg.poses[num].pose.position.x
+                    tmp_pose.pose.position.y = self.global_path_msg.poses[num].pose.position.y
+                    tmp_pose.pose.orientation.w = 0.0
+                    local_path_msg.poses.append(tmp_pose) 
 
             self.local_path_pub.publish(local_path_msg)
         
