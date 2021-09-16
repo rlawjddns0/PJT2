@@ -6,9 +6,8 @@
 :: packages contained in this prefix path.
 
 :: source chained prefixes
-call:_colcon_prefix_chain_bat_call_script "C:\dev\ros2_eloquent\local_setup.bat"
-call:_colcon_prefix_chain_bat_call_script "C:\dev\ros2_eloquent\\local_setup.bat"
-call:_colcon_prefix_chain_bat_call_script "C:\Users\multicampus\Desktop\S05P21B202\ros2_smart_home\install\\local_setup.bat"
+call:_colcon_prefix_chain_bat_call_script "C:\dev\ros2-eloquent\local_setup.bat"
+call:_colcon_prefix_chain_bat_call_script "C:\dev\ros2-eloquent\\local_setup.bat"
 
 :: source this prefix
 call:_colcon_prefix_chain_bat_call_script "%%~dp0local_setup.bat"

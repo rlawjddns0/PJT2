@@ -102,33 +102,42 @@ def transformMTX_lidar2cam(params_lidar, params_cam):
     2. 라이다에서 카메라 위치까지 변환하는 translation 행렬을 정의
     3. 카메라의 자세로 맞춰주는 rotation 행렬을 정의.
     4. 위의 두 행렬을 가지고 최종 라이다-카메라 변환 행렬을 정의.
-    
-    transform the coordinate of the lidar points to the camera coordinate
-    xs, ys, zs : xyz components of lidar points w.r.t a lidar coordinate
-    params_lidar : parameters from lidars 
-    params_cam : parameters from cameras
     """
 
-    # 로직 1. params에서 라이다와 카메라 센서들의 자세, 위치 정보를 뽑기.
+    """
+    로직 1. params에서 라이다와 카메라 센서들의 자세, 위치 정보를 뽑기.
 
-    lidar_yaw, lidar_pitch, lidar_roll = [np.deg2rad(params_lidar.get(i)) for i in (["YAW","PITCH","ROLL"])]
-    cam_yaw, cam_pitch, cam_roll = [np.deg2rad(params_cam.get(i)) for i in (["YAW","PITCH","ROLL"])]
+    lidar_yaw, lidar_pitch, lidar_roll =
+    cam_yaw, cam_pitch, cam_roll =
     
-    lidar_pos = [params_lidar.get(i) for i in (["X","Y","Z"])]
-    cam_pos = [params_cam.get(i) for i in (["X","Y","Z"])]
-
-    # 로직 2. 라이다에서 카메라 까지 변환하는 translation 행렬을 정의
-    Tmtx = translationMtx(lidar_pos[0]-cam_pos[0], lidar_pos[1]-cam_pos[1], lidar_pos[2]-cam_pos[2])
-
-    #로직 3. 카메라의 자세로 맞춰주는 rotation 행렬을 정의
-    Rmtx = rotationMtx(lidar_yaw - cam_yaw, lidar_pitch - cam_pitch, lidar_roll - cam_roll)
-
-    # 로직 4. 위의 두 행렬을 가지고 최종 라이다-카메라 변환 행렬을 정의
-    RT = np.matmul(Rmtx, Tmtx)
-    print(RT)
+    lidar_pos = 
+    cam_pos = 
 
     """
-    # 테스트
+
+    """
+
+    로직 2. 라이다에서 카메라 까지 변환하는 translation 행렬을 정의
+    Tmtx = 
+
+    """
+
+    """
+    로직 3. 카메라의 자세로 맞춰주는 rotation 행렬을 정의
+
+    Rmtx = 
+
+    """
+
+    """
+
+    로직 4. 위의 두 행렬을 가지고 최종 라이다-카메라 변환 행렬을 정의
+    RT = 
+
+    """
+
+    """
+    테스트
 
     params_lidar = {
         "X": 0, # meter
@@ -173,22 +182,28 @@ def project2img_mtx(params_cam):
     2. 카메라의 파라메터로 이미지 프레임 센터를 계산.
     3. Projection 행렬을 계산 
 
-    project the lidar points to 2d plane
-    xc, yc, zc : xyz components of lidar points w.r.t a camera coordinate
-    params_cam : parameters from cameras 
     """
 
-    # 로직 1. params에서 카메라의 width, height, fov를 가져와서 focal length를 계산.
-    fc_x = fc_y = params_cam['HEIGHT'] / (2 * math.tan(params_cam['FOV'] / 2)) # 207.84609690826528
     
+    """
+    로직 1. params에서 카메라의 width, height, fov를 가져와서 focal length를 계산.
+    
+    fc_x = 
+    fc_y = 
+    """
 
-    # 로직 2. 카메라의 파라메터로 이미지 프레임 센터를 계산.
-    cx = params_cam['WIDTH'] / 2 # 160
-    cy = params_cam['HEIGHT'] / 2 # 120
+    """
+    로직 2. 카메라의 파라메터로 이미지 프레임 센터를 계산.
+    cx = 
+    cy = 
+    """
 
-    # 로직 3. Projection 행렬을 계산.
-    R_f = np.array([[fc_x, 0, cx], [0, fc_y, cy]])
-    print(R_f)
+    """
+
+    로직 3. Projection 행렬을 계산.
+    R_f =
+
+    """
 
     """
     테스트
@@ -230,6 +245,7 @@ class LIDAR2CAMTransform:
     def __init__(self, params_cam, params_lidar):
 
         """
+
         LIDAR2CAMTransform 정의 및 기능 로직 순서
         1. Params를 입력으로 받아서 필요한 파라메터들과 RT 행렬, projection 행렬 등을 정의. 
         2. 클래스 내 self.RT로 라이다 포인트들을 카메라 좌표계로 변환.
@@ -251,29 +267,39 @@ class LIDAR2CAMTransform:
 
     def transform_lidar2cam(self, xyz_p):
         
-        # xyz_c = xyz_p
-        # 로직 2. 클래스 내 self.RT로 라이다 포인트들을 카메라 좌표계로 변환시킨다.
-        xyz_c = np.matmul(np.concatenate([xyz_p, np.ones((xyz_p.shape[0], 1))], axis=1), self.RT.T)
-
+        xyz_c = xyz_p
+        
+        """
+        
+        로직 2. 클래스 내 self.RT로 라이다 포인트들을 카메라 좌표계로 변환시킨다.
+        
+        xyz_c = 
+        
+        """
         return xyz_c
 
     def project_pts2img(self, xyz_c, crop=True):
 
         xyi=np.zeros((xyz_c.shape[0], 2))
 
-        # 로직 3. RT로 좌표 변환된 포인트들의 normalizing plane 상의 위치를 계산.
-        xc, yc, zc = xyz_c[0,:].reshape([1,-1]), xyz_c[1,:].reshape([1,-1]), xyz_c[2,:].reshape([1,-1])
-        xn, yn = xc/(zc+0.0001), yc/(zc+0.0001)
+        """
+        로직 3. RT로 좌표 변환된 포인트들의 normalizing plane 상의 위치를 계산.
+        xn, yn = 
 
+        """
+        
         # 로직 4. normalizing plane 상의 라이다 포인트들에 proj_mtx를 곱해 픽셀 좌표값 계산.
-        xyi = np.matmul(self.proj_mtx, np.concatenate([xn, yn, np.ones_like(xn)], axis=0))
 
-        # 로직 5. 이미지 프레임 밖을 벗어나는 포인트들을 crop.
+        # xyi = np.matmul(self.proj_mtx, np.concatenate([xn, yn, np.ones_like(xn)], axis=0))
+
+        """
+        로직 5. 이미지 프레임 밖을 벗어나는 포인트들을 crop.
+
         if crop:
-            xyi = self.crop_pts(xyi)
+            xyi = 
         else:
             pass
-        
+        """
         return xyi
 
     def crop_pts(self, xyi):
@@ -318,48 +344,63 @@ class SensorCalib(Node):
 
     def img_callback(self, msg):
         
-        # 로직 3. 카메라 콜백함수에서 이미지를 클래스 내 변수로 저장.
-        np_arr = np.frombuffer(msg.data, np.uint8)
-        self.img = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
+        """
+   
+        로직 3. 카메라 콜백함수에서 이미지를 클래스 내 변수로 저장.
+
+        np_arr = 
+
+        self.img = 
+
+        """
 
     def scan_callback(self, msg):
+    
+        """
 
-        # 로직 4. 라이다 2d scan data(거리와 각도)를 가지고 x,y 좌표계로 변환
-        self.R = np.array(msg.ranges)
-        self.intens = np.array(msg.intensities)
+        로직 4. 라이다 2d scan data(거리와 각도)를 가지고 x,y 좌표계로 변환
 
-        x = self.R*np.cos(np.linspace(0, 2*np.pi, 360))
-        y = self.R*np.sin(np.linspace(0, 2*np.pi, 360))
-        z = np.zeros_like(x)
+        self.R = 
+
+        x = 
+        y = 
+        z = 
 
         self.xyz = np.concatenate([
             x.reshape([-1, 1]),
             y.reshape([-1, 1]),
             z.reshape([-1, 1])
         ], axis=1)
+        
+        """
 
     def timer_callback(self):
 
         if self.xyz is not None and self.img is not None :
 
-            # 로직 5. 라이다 x,y 좌표 데이터 중 정면 부분만 crop
-            xyz_p = self.xyz[np.where(self.xyz[:, 0]>=0)]
+            """
+            로직 5. 라이다 x,y 좌표 데이터 중 정면 부분만 crop
+            xyz_p = 
+            """
 
-            intens_p = self.intens.reshape([-1,1])
-            intens_p = intens_p[np.where(self.xyz[:, 0]>=0)]
+            """
+            로직 6. transformation class 의 transform_lidar2cam 로 카메라 3d 좌표 변환
+            xyz_c = 
+            """
 
-            # 로직 6. transformation class 의 transform_lidar2cam 로 카메라 3d 좌표 변환
-            xyz_c = self.l2c_trans.transform_lidar2cam(xyz_p)
+            """
+            로직 7. transformation class 의 project_pts2img로 카메라 프레임으로 정사영
+            xy_i = 
+            """
 
-            # 로직 7. transformation class 의 project_pts2img로 카메라 프레임으로 정사영
-            xy_i = self.l2c_trans.project_pts2img(xyz_c, crop=True)
+            """
+            로직 8. draw_pts_img()로 카메라 이미지에 라이다 포인트를 draw 하고 show
+            
+            img_l2c = 
 
-            # 로직 8. draw_pts_img()로 카메라 이미지에 라이다 포인트를 draw 하고 show
-            img_l2c = draw_pts_img(self.img, xy_i[:, 0].astype(np.int32),
-                                            xy_i[:, 1].astype(np.int32))
-                                                
             cv2.imshow("Lidar2Cam", img_l2c)
             cv2.waitKey(1)
+            """
 
         else:
 
