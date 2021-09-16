@@ -51,7 +51,7 @@ params_lidar = {
     "Block_SIZE": int(1206),
     "X": 0, # meter
     "Y": 0,
-    "Z": 0.6,
+    "Z": 0.2,
     "YAW": 0, # deg
     "PITCH": 0,
     "ROLL": 0
@@ -67,7 +67,7 @@ params_cam = {
     "Block_SIZE": int(65000),
     "X": 0, # meter
     "Y": 0,
-    "Z": 1,
+    "Z": 0.2,
     "YAW": 0, # deg
     "PITCH": 5,
     "ROLL": 0
@@ -168,7 +168,6 @@ def scan_callback(msg):
    
 
 def main(args=None):
-
     # 로직 2. pretrained file and label map load    
     ## 우선 스켈레톤 코드는 구글이 이미 학습시켜서 model zoo에 올린, mobilenet v1을 backbone으로 하는 
     ## single shot detector 모델의 pretrained 파라메터인 
@@ -255,7 +254,7 @@ def main(args=None):
     # subscription_img
     
     # 로직 8. lidar2img 좌표 변환 클래스 정의
-    # sub2의 좌표 변환 클래스를 가져와서 정의.
+    # sub2의 좌표 변환 클래스를 가져와서 정의. sub2.ex_calib에서 다 가져왔음
 
     l2c_trans = LIDAR2CAMTransform(params_cam, params_lidar)
 
@@ -285,8 +284,6 @@ def main(args=None):
 
         xyii = np.concatenate([xy_i, xyz_p], axis=1)
 
-        """
-
         # 로직 12. bounding box 결과 좌표 뽑기
         ## boxes_detect 안에 들어가 있는 bounding box 결과들을
         ## 좌상단 x,y와 너비 높이인 w,h 구하고, 
@@ -298,12 +295,14 @@ def main(args=None):
             ih = img_bgr.shape[0]
             iw = img_bgr.shape[1]
 
-            boxes_np = 
+            boxes_np = np.array(boxes_detect)
+            # print("boxes_np", boxes_np)
+            # boxes_np [[2.8653672e-01 3.8322806e-04 9.9154472e-01 1.0000000e+00]]
 
-            x = 
-            y = 
-            w = 
-            h = 
+            x = boxes_np.T[1]*iw
+            y = boxes_np.T[0]*ih
+            w = (boxes_np.T[3]-boxes_np.T[1])*iw
+            h = (boxes_np.T[2]-boxes_np.T[0])*ih
 
             bbox = np.vstack([
                 x.astype(np.int32).tolist(),
@@ -311,11 +310,11 @@ def main(args=None):
                 w.astype(np.int32).tolist(),
                 h.astype(np.int32).tolist()
             ]).T
+            # for i in range(len(boxes_detect)):
+            #     # [0.51189506 0.00946438 0.9975513  0.9856086 ] 이런 식
+            #     print(boxes_detect[i])
 
-        """
 
-            
-        """
 
             # 로직 13. 인식된 물체의 위치 추정
             ## bbox가 구해졌으면, bbox 안에 들어가는 라이다 포인트 들을 구하고
@@ -329,23 +328,26 @@ def main(args=None):
                 w = int(bbox[i, 2])
                 h = int(bbox[i, 3])
 
-                cx = 
-                cy = 
+                cx = x + int(w/2)
+                cy = y + int(h/2)
                 
-                xyv = 
-
+                xyv = xyii[np.logical_and(xyii[:, 0]>=cx-0.4*w, xyii[:, 0]<cx+0.4*w), :]
+                xyv = xyv[np.logical_and(xyv[:, 1]>=cy-0.4*h, xyv[:, 1]<cy+0.4*h), :]
                 ## bbox 안에 들어가는 라이다 포인트들의 대표값(예:평균)을 뽑는다
-                ostate = 
+                ostate = np.median(xyv[:, 2:], axis=0)
 
                 ## 대표값이 존재하면 
                 if not np.isnan(ostate[0]):
                     ostate_list.append(ostate)
 
+                for _ in ostate_list:
+                    distance = math.sqrt(math.pow(ostate_list[0][0],2)+math.pow(ostate_list[0][1],2))
+                    cv2.putText(image_process,str(distance),(30,200), cv2.FONT_HERSHEY_SIMPLEX, 1,(255,255,255), 2, 0)
             image_process = draw_pts_img(image_process, xy_i[:, 0].astype(np.int32),
                                             xy_i[:, 1].astype(np.int32))
 
             print(ostate_list)
-        """
+
         visualize_images(image_process, infer_time)
 
     g_node.destroy_node()

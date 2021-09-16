@@ -49,8 +49,8 @@ class iot_udp(Node):
         super().__init__('iot_udp')
 
         self.ip='127.0.0.1'
-        self.port=7502
-        self.send_port=7401
+        self.port=7502 # Object info(Sim -> User) Destination PORT
+        self.send_port=7401 # Object Status Control(Sim <- User) Host PORT
 
         # 로직 1. 통신 소켓 생성
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -60,8 +60,8 @@ class iot_udp(Node):
         self.parsed_data=[]
         
         # 로직 2. 멀티스레드를 이용한 데이터 수신
-        thread = threading.Thread(target=self.recv_udp_data)
-        thread.daemon = True 
+        thread = threading.Thread(target=self.recv_udp_data) # 스레드가 실행할 타겟
+        thread.daemon = True # 메인 스레드가 종료되면 함께 종료됨
         thread.start() 
 
         self.is_recv_data=False
