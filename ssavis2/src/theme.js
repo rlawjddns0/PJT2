@@ -3,7 +3,7 @@ export const lightTheme = {
     text: '#000000',
     purple: '#9b59b6',
     blue: '#3498db',
-    imageBackground: 'grey',
+    imageBackground: '#A7F3D0',
     label: 'grey',
     inputPlaceholder: 'grey',
     inputBorder: 'grey',
@@ -12,6 +12,10 @@ export const lightTheme = {
     buttonTitle:'white',
     buttonUnfilledTitle: '#A7F3D0',
     headerTintColor: '#A7F3D0',
+    imageButtonBackground: '#92C5FC',
+    imageButtonIcon: 'white',
+    spinnerBackground: 'black',
+    spinnerIndicator: 'white',
 };
 
 export const darkTheme = {
@@ -28,4 +32,8 @@ export const darkTheme = {
     buttonTitle:'white',
     buttonUnfilledTitle: '#A7F3D0',
     headerTintColor: '#A7F3D0',
+    imageButtonBackground: '#92C5FC',
+    imageButtonIcon: 'white',
+    spinnerBackground: 'black',
+    spinnerIndicator: 'white',
 };
