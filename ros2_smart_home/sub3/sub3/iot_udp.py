@@ -55,8 +55,8 @@ class iot_udp(Node):
         # 로직 1. 통신 소켓 생성
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         recv_address = (self.ip,self.port)
-        self.sock.bind(recv_address)
-        self.data_size=65535 
+        self.sock.bind(recv_address) # ip와 user의 포트 번호
+        self.data_size=65535
         self.parsed_data=[]
         
         # 로직 2. 멀티스레드를 이용한 데이터 수신
@@ -68,72 +68,82 @@ class iot_udp(Node):
 
         os.system('cls')
         while True:
-            pass
-            '''
-            로직 5. 사용자 메뉴 생성
+            # 로직 5. 사용자 메뉴 생성
             print('Select Menu [0: scan, 1: connect, 2:control, 3:disconnect, 4:all_procedures ] ')
-            menu=??
+            menu = int(input())
 
-            if menu == ?? :
-                채워 넣기
-            
-
-            '''
+            if menu == 0:
+                self.scan()
+            elif menu == 1:
+                self.connect()
+            elif menu == 2:
+                self.control()
+            elif menu == 3:
+                self.disconnect()
+            elif menu == 4:
+                self.all_procedures()
 
 
     def data_parsing(self,raw_data) :
-        print(raw_data)
+        # print("수신 데이터: ", raw_data) # 수신한 데이터 확인
         
-        '''
-        로직 3. 수신 데이터 파싱
+        # 로직 3. 수신 데이터 파싱
 
-        header=?
-        data_length=?
-        aux_data=?
+        header=raw_data[:19].decode('utf-8')
+        data_length=raw_data[19:23]
+        aux_data=raw_data[23:35]
 
-
-        if header == ?? and data_length[0] == ??:
-            uid_pack=??
+        # print("헤더: ", header)
+        # print("데이터 길이: ", data_length[0])
+        # print("aux_data: ", aux_data)
+        
+        if header == "#Appliances-Status$" and data_length[0] == 20:
+            uid_pack=raw_data[35:51] # AUX_DATA 이후의 16바이트
             uid=self.packet_to_uid(uid_pack)
-        
-            network_status=??
-            device_status=??
+    
+            network_status=raw_data[51:53]
+            device_status=raw_data[53:55]
+            # if network_status[0] == 10 and network_status[1] == 37:
+            #     print("네트워크 연결: 정상")
+            # if network_status[0] == 11 and network_status[1] == 49:
+            #     print("네트워크 연결: 연결중")
+            # if network_status[0] == 12 and network_status[1] == 81:
+            #     print("네트워크 연결: 연결 종료")
+            # if device_status[0] == 11 and device_status[1] == 55:
+            #     print("디바이스 ON")
+            # if device_status[0] == 10 and device_status[1] == 112:
+            #     print("디바이스 OFF")
+            # if device_status[0] == 12 and device_status[1] == 68:
+            #     print("디바이스 ERROR")
             
             self.is_recv_data=True
             self.recv_data=[uid,network_status,device_status]
-        '''
  
     def send_data(self,uid,cmd):
         
         pass
-        '''
-        로직 4. 데이터 송신 함수 생성
+        # 로직 4. 데이터 송신 함수 생성
 
  
-        header=?
-        data_length=?
-        aux_data=?
-        self.upper=?
-        self.tail=?
+        header=b"$Ctrl-command$"
+        data_length=bytes([0x12, 0x0, 0x0, 0x0])
+        aux_data=bytes([0x0] * 12)
+        self.upper=header + data_length + aux_data
+        self.tail=bytes([0x0D, 0x0A])
 
         uid_pack=self.uid_to_packet(uid)
         cmd_pack=bytes([cmd[0],cmd[1]])
 
         send_data=self.upper+uid_pack+cmd_pack+self.tail
         self.sock.sendto(send_data,(self.ip,self.send_port))
-        '''
 
-
+    # 데이터 수신시
     def recv_udp_data(self):
-        while True :
+        while True:
             raw_data, sender = self.sock.recvfrom(self.data_size)
             self.data_parsing(raw_data)
             
 
-
-            
-        
-            
     def uid_to_packet(self,uid):
         uid_pack=binascii.unhexlify(uid)
         return uid_pack
@@ -155,12 +165,12 @@ class iot_udp(Node):
         
         print('SCANNING NOW.....')
         print('BACK TO MENU : Ctrl+ C')
-        '''
-        로직 6. iot scan
-
-        주변에 들어오는 iot 데이터(uid,network status, device status)를 출력하세요.
-
-        '''
+        # 로직 6. iot scan
+        # 주변에 들어오는 iot 데이터(uid,network status, device status)를 출력하세요.
+        if self.is_recv_data:
+            print("uid: {}, network_status: {} {}, device_status: {} {}".format(\
+            self.recv_data[0], self.recv_data[1][0],\
+            self.recv_data[1][1], self.recv_data[2][0], self.recv_data[2][1],))
         
                    
 
