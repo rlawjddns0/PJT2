@@ -14,7 +14,7 @@
 - 음성 인식 - STT(Speech-To-Text) API 활용, 음성인식을 통한 제어
 - 푸시 알림 (청소 완료, 분실물 확인, 칩입자 인식)
 
-:family_man_man_girl_boy: ​ 팀원 역할
+:white_check_mark: ​ 팀원 역할
 
 * 이수정(팀장) : FE(UI/UX), 사물 인식 담당
 * 배현우(팀원) : FE 담당, 제어 담당
@@ -50,7 +50,7 @@ ex. S05P21B202-28 [feat] 오후 sub1 명세서 학습
 - test : 테스트 코드, 리펙토링 테스트 코드 추가
 - chore : 빌드 업무 수정, 패키지 매니저 수정
 
-:picture: 와이어프레임
+:white_check_mark: 와이어프레임
 
 [와이어프레임](https://www.figma.com/file/iYeLmY0nTDgfWH4C606YBN/SSAVIS?node-id=0%3A1 "와이어프레임")
 
