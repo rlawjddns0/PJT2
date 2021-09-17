@@ -50,17 +50,17 @@ ex. S05P21B202-28 [feat] 오후 sub1 명세서 학습
 - test : 테스트 코드, 리펙토링 테스트 코드 추가
 - chore : 빌드 업무 수정, 패키지 매니저 수정
 
-:framed_picture: 와이어프레임
+:picture: 와이어프레임
 
-[와이어프레임](https://www.figma.com/file/iYeLmY0nTDgfWH4C606YBN/SSAVIS?node-id=0%3A1 "d와이어프레임")
+[와이어프레임](https://www.figma.com/file/iYeLmY0nTDgfWH4C606YBN/SSAVIS?node-id=0%3A1 "와이어프레임")
 
 :date: 간츠 차트
 
-![간츠차트](C:\Users\multicampus\Desktop\간츠차트.png)
+![간츠차트](/uploads/0230f8b0b6eeea1fdb07785ab6f3e0d7/간츠차트.png)
 
 :bank: ​다이어그램
 
-![diagram](C:\Users\multicampus\Desktop\diagram.JPG)
+![diagram](/uploads/5a057db8e1a108b78de487bd7ee47706/diagram.JPG)
 
 
 
