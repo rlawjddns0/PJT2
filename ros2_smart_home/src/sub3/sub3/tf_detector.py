@@ -145,6 +145,8 @@ def visualize_images(image_out, t_cost):
 def img_callback(msg):
 
     global img_bgr
+    global origin_img
+    origin_img = msg.data
 
     np_arr = np.frombuffer(msg.data, np.uint8)
     img_bgr = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
@@ -180,20 +182,21 @@ def main(args=None):
     # back_folder='catkin_ws\\src\\ros2_smart_home\\sub3'
     # back_folder='Desktop\\test_ws\\src\\ssafy_smarthome\\sub3'
 
-    CWD_PATH = os.getcwd()
+    # CWD_PATH = os.getcwd()
     
     MODEL_NAME = 'ssd_mobilenet_v1_coco_2018_01_28'
 
-    PATH_TO_WEIGHT = os.path.join(CWD_PATH, 'model_weights', \
+    PATH_TO_WEIGHT = os.path.join('C:\\Users\\multicampus\\Desktop\\S05P21B202\\ros2_smart_home\\src\\sub3\\sub3', 'model_weights', \
         MODEL_NAME, 'frozen_inference_graph.pb')
 
-    print(PATH_TO_WEIGHT)
-    PATH_TO_LABELS = os.path.join(CWD_PATH, 'model_weights', \
+    print('PATH_TO_WEIGHT : ' + PATH_TO_WEIGHT)
+    PATH_TO_LABELS = os.path.join('C:\\Users\\multicampus\\Desktop\\S05P21B202\\ros2_smart_home\\src\\sub3\\sub3', 'model_weights', \
         'data', 'mscoco_label_map.pbtxt')
+    print('PATH_TO_LABELS : ' + PATH_TO_LABELS)
 
     NUM_CLASSES = 90
 
-    print("logic1")
+    # print("logic1")
     # Loading label map
     label_map = label_map_util.load_labelmap(PATH_TO_LABELS)
     categories = label_map_util.convert_label_map_to_categories(label_map,
@@ -347,7 +350,7 @@ def main(args=None):
             image_process = draw_pts_img(image_process, xy_i[:, 0].astype(np.int32),
                                             xy_i[:, 1].astype(np.int32))
 
-            print(ostate_list)
+            # print(ostate_list)
 
         visualize_images(image_process, infer_time)
 
