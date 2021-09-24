@@ -5,5 +5,7 @@ import ChannelCreation from './ChannelCreation';
 import Mode from './Mode';
 import Settings from './Settings';
 import Main from './Main';
-export {Login, Signup, Channel, ChannelCreation, Main, Mode, Settings};
+import AppControll from './AppControll';
+import Cleaning from './Cleaning';
+export {Login, Signup, Channel, ChannelCreation, Main, Mode, Settings, AppControll, Cleaning};
 

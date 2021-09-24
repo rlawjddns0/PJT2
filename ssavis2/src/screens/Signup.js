@@ -1,4 +1,4 @@
-import React ,{useState, useEffect, useRef} from 'react';
+import React ,{useState, useEffect, useRef, useContext} from 'react';
 import styled from 'styled-components/native';
 import { Image, Input, Button } from '../components';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';

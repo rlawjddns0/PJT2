@@ -31,6 +31,9 @@ export const login = async ({ email, password }) => {
     return user;
 }
 
+export const logout = async () => {
+    return await Auth.signOut();
+}
 export const signup = async ({ email, password, name, photoUrl }) => {
     const { user } = await Auth.createUserWithEmailAndPassword(email, password);
     const storageUrl = photoUrl.startsWith('https')
@@ -41,4 +44,8 @@ export const signup = async ({ email, password, name, photoUrl }) => {
         photoURL:storageUrl,
     })
     return user;
+}
+export const getCurrentUser = () => {
+    const { uid, displayName, email, photoURL } = Auth.currentUser;
+    return { uid, name: displayName, email, photoUrl: photoURL};
 }

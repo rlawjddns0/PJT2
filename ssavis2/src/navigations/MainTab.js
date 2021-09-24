@@ -1,16 +1,23 @@
-import React from 'react';
+import React,{ useContext } from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Main, Mode, Settings } from '../screens';
+import { ThemeContext } from 'styled-components/native';
 import {Ionicons} from '@expo/vector-icons';
 import MainStack from './MainStack';
+import PropTypes from 'prop-types';
 const Tab = createBottomTabNavigator(
 );
 
-const MainTab = () => {
+const MainTab = ({onDarkModeChange, darkMode}) => {
+    const theme = useContext(ThemeContext);
     return (
         <Tab.Navigator 
         screenOptions={{
-            tabBarShowLabel:false
+            tabBarShowLabel:false,
+            tabBarStyle: {
+                backgroundColor: theme.tabBackground,
+                
+            }
         }}>
             <Tab.Screen 
                 name="MainStack" 
@@ -20,7 +27,7 @@ const MainTab = () => {
                     tabBarIcon: ({focused}) => (
                         <Ionicons
                         name="ios-home"
-                        style={{ color: focused ? "#A7F3D0" : "#404040"}}
+                        style={{ color: focused ? theme.tabIconFocused : theme.tabIcon}}
                         size={30}
                         />
                     )
@@ -31,18 +38,20 @@ const MainTab = () => {
                     tabBarIcon: ({focused}) => (
                         <Ionicons
                         name="ios-location"
-                        style={{ color: focused ? "#A7F3D0" : "#404040"}}
+                        style={{ color: focused ? theme.tabIconFocused : theme.tabIcon}}
                         size={30}
                         />
                     )
                 }}
             />
-            <Tab.Screen name="Settings" component={Settings} 
+            <Tab.Screen name="Settings" 
+            children={() =><Settings DarkModeChange={onDarkModeChange} darkModeValue={darkMode} />}
+            
             options={{
                     tabBarIcon: ({focused}) => (
                         <Ionicons
                         name="ios-settings"
-                        style={{ color: focused ? "#A7F3D0" : "#404040"}}
+                        style={{ color: focused ? theme.tabIconFocused : theme.tabIcon}}
                         size={30}
                         />
                     )
@@ -52,4 +61,8 @@ const MainTab = () => {
     );
 };
 
+// MainTab.propTypes={
+//     darkMode : PropTypes.boolean,
+//     onDarkModeChange : PropTypes.func,
+// }
 export default MainTab;
