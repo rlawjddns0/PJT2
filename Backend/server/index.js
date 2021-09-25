@@ -3,9 +3,12 @@ const path=require('path');
 const bcrypt=require('bcrypt')
 const DB=require('./config/DBconfig')
 const saltRounds=10
+const { swaggerUi, specs } = require('./modules/swagger');
+
 // Websocket 서버 구동을 위한 서버 코드입니다.
 
 // 노드 로직 순서
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));
 
 const express = require('express');
 
@@ -25,6 +28,7 @@ const io = require('socket.io')(server)
 
 
 var fs = require('fs'); // required for file serving
+const { application } = require('express');
 
 // 로직 2. 포트번호 지정
 const port = process.env.port || 12001
@@ -60,7 +64,8 @@ app.post('/api/users/login',function(req,res){
         if(validPassword){
             return res.status(200).json({
                 success:true,
-                msg:"로그인 성공"
+                msg:"로그인 성공",
+                user:data,
             })
         }else{
             return res.status(200).json({
@@ -116,6 +121,107 @@ app.post('/api/users/register',function(req,res){
 
 
 })
+
+
+app.post('/api/mode/custom',function(req,res){
+    const body=req.body
+    const user_no=body.user_no
+    const mode_name=body.mode_name
+
+    const iot=body.iot
+    const time=body.time
+    const day=body.day
+    DB.query('insert into mode(`user_no`,`mode_name`,`iot`,`time`,`day`) values(?,?,?,?,?)',
+    [user_no,mode_name,iot,time,day],(err,data)=>{
+        if(err)console.log(err)
+
+        return res.status(200).json({
+            success:true,
+            msg:"모드저장 완료"
+        })
+
+    })
+
+})
+
+//사용자가 가지고 있는 모드 리스트
+app.get('/api/mode/customList/:user_no',function(req,res){
+    
+    const user_no=req.params.user_no
+    DB.query('select * from mode where user_no=?',[user_no],(err,data)=>{
+        if(err)console.log(err)
+        return res.status(200).json({
+            success:true,
+            msg:"사용자가 설정한 모드",
+            data
+        })
+    })
+
+})
+
+//분실물 리스트 받아오기
+app.get('/api/belongings/list/:user_no',function(req,res){
+    const user_no=req.params.user_no
+    //현재 사용중인 유저의 분실물중 찾지 못한것(false값)들
+    DB.query('select * from belongings where user_no=? and flag=?',[user_no,false],
+    (err,data)=>{
+        if(err)console.log(err)
+        
+        return res.status(200).json({
+            success:true,
+            msg:"현재 분실물 리스트 정보",
+            data
+        })
+    })
+})
+
+//찾은 분실물 체크
+app.post('/api/belongings/check',function(req,res){
+    const body=req.body
+    //분실물 번호
+    const no=body.no
+    //no값의 분실물 찾았다고 flag값 true로 바꾼다.
+    DB.query('update belongings set flag=? where no=?',[true,no],
+    (err,data)=>{
+        if(err)console.log(err)
+        if(data.length>0){
+            return res.status(200).json({
+                success:true,
+                msg:"체크완료"
+            })
+        }
+    })
+})
+
+//침입 관리 기록 리스트 가져오기
+app.get('/api/intruders/list/:user_no',function(req,res){
+    const user_no=req.params.user_no
+    const sql='select * from intruders where user_no=?'
+    const param=[user_no]
+
+    DB.query(sql,param,(err,data)=>{
+        if(err){
+            console.log(err)
+        }else{
+            return res.status.json({
+                success:true,
+                msg:"침입관리 기록 리스트",
+                data
+            })
+        }
+    })
+
+})
+
+
+
+
+
+
+
+//분실물 저장??-> 이건 터틀봇이 하는 일인데
+
+
 
 
 
@@ -251,5 +357,48 @@ io.on('connection', socket => {
         buffer = Buffer.from(message, "base64");
         fs.writeFileSync(path.join(picPath, "/../client/cam.jpg"), buffer);
     });
+
+
+    socket.on('findBelongings',(data)=>{
+        //먼저 애플리케이션에 알람 보내고~
+        socket.to(roomName).emit('alert',"분실물 발견")
+
+        //디비에 저장
+        console.log("터틀봇에게 분실물 찾았다고 왔다~~")
+        const type=data.type
+        const user_no=data.user_no
+        const photo=data.photo
+        const flag=false
+        const datetime=data.datetime
+        const sql='insert into belongings(type,user_no,photo,flag,datetime) values(?,?,?,?,?)'
+        const param=[type,user_no,photo,flag,datetime]
+        DB.query(sql,param,(err,data)=>{
+            if(err){
+                console.log(err)
+            }
+        })
+
+    })
+
+    //침입자 발견시
+    socket.on('findIntruder',(data)=>{
+        //먼저 애플리케이션에 알람 보내고~
+        socket.to(roomName).emit('alert',"침입자 발견")
+        const user_no=data.user_no
+        const photo=data.photo
+        const datetime=data.datetime
+        const sql='insert into intruders(user_no,photo,datetime) values(?,?,?)'
+        const param=[user_no,photo,datetime]
+        DB.query(sql,param,(err,data)=>{
+            if(err){
+                console.log(err)
+            }
+        })
+
+
+
+
+
+    })
 
 })
