@@ -5,7 +5,11 @@
 // 2. 버튼 클릭시 호출되는 함수
 
 
+const socket = io();
 
+socket.on('disconnect', function()  {
+    console.log('disconnected form server_client.');
+});
 
 // 로직 1. 서버에서 온 메시지를 웹페이지에 전달
 socket.on('sendSafetyStatus', function(message) {
@@ -113,24 +117,32 @@ function btn_light2_off() {
 
     socket.emit('Light2OffToServer', data);
 };
+function modeOnToServer() {
 
+    console.log('modeOnToServer');
 
+    let data = '08162200';
 
-//앱에서 연결 해제
-function disconnect() {
-
-    console.log('연결해제~');
-    socket.disconnect();
+    socket.emit('modeOnToServer', data);
 };
-//앱과 서버 연결
-function connect() {
 
-    console.log('연결~');
-    var option={'forceNew:':false};
-    var url='http://localhost:12001';
-    const socket = io(url,option);
-    socket.on('connect',()=>{
-        console.log("웹소켓 서버에 연결되었습니다.: "+url)
-        console.log('socket.id:' + socket.id)
-    })
-};
+
+
+// //앱에서 연결 해제
+// function disconnect() {
+
+//     console.log('연결해제~');
+//     socket.disconnect();
+// };
+// //앱과 서버 연결
+// function connect() {
+
+//     console.log('연결~');
+//     var option={'forceNew:':false};
+//     var url='http://localhost:12001';
+//     const socket = io(url,option);
+//     socket.on('connect',()=>{
+//         console.log("웹소켓 서버에 연결되었습니다.: "+url)
+//         console.log('socket.id:' + socket.id)
+//     })
+// };

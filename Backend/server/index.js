@@ -8,6 +8,7 @@ const user=require('./router/user')
 const mode=require('./router/mode')
 const intruders=require('./router/intruders')
 const belongings=require('./router/belongings')
+const schedule=require('node-schedule')
 // Websocket 서버 구동을 위한 서버 코드입니다.
 
 // 노드 로직 순서
@@ -35,12 +36,17 @@ const { application } = require('express');
 // 로직 2. 포트번호 지정
 const port = process.env.port || 12001
 
+var startMode
+var endMode
+
 
 //############################# api 시작~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 app.use('/api/user',user)
 app.use('/api/belongings',belongings)
 app.use('/api/mode',mode)
 app.use('/api/intruders',intruders)
+
 //########################## 3api 끝~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
@@ -54,9 +60,27 @@ const roomName = 'team';
 
 
 //##############################소켓 연결 후#################################
-//연결 버튼 누르면
+//실행
 io.on('connection', socket => {
+    console.log("소켓 참여~")
     socket.join(roomName);
+
+
+    socket.on('sendTime',(message)=>{
+        socket.to(roomName).emit('sendTimeToWeb',message);
+    })
+
+    socket.on('sendWeather',(message)=>{
+        socket.to(roomName).emit('sendWeaterToWeb',message);
+    })
+
+    socket.on('sendTemperature',(message)=>{
+        socket.on(roomName).emit('sendTemperatureToWeb',message)
+    })
+
+    socket.on('sendAirConditioner',(message)=>{
+        socket.on(roomName).emit('sendAriConditionerToWeb',message)
+    })
 
     // 로직 3. 사용자의 메시지 수신시 WebClient로 메시지 전달
     socket.on('safety_status', (message) => {
@@ -72,8 +96,21 @@ io.on('connection', socket => {
         //security service on~~
         socket.to(roomName).emit('patrolOn')
 
+        const date=new Date()
+        // date = new Date(2021, 9, 26, 5, 1, 0);
+        console.log(date)
+        date.setMinutes(date.getMinutes()+1)
+        console.log(date)
+        const job = schedule.scheduleJob(date, function(){
+            console.log('The world is going to end today.');
+        });
+
+
+
+
+
         //패트롤 작동한다고 다시 메시지 보내기~
-        socket.emit('sendPatrolStatus', "시큐리티 서비스 작동");
+        socket.to(roomName).emit('sendPatrolStatus', "시큐리티 서비스 작동");
         console.log('Patrol On!');
     });
 
@@ -103,77 +140,25 @@ io.on('connection', socket => {
         socket.to(roomName).emit('turnright', data);
     });
 
-    socket.on('airconOnToServer', (data) => {
-        console.log("어플리케이션에서 에어컨 키라고 명령이 왔다")
 
-        //터틀봇에 에어컨 키라고 명령 보내고
-        socket.to(roomName).emit('airconOn', data);
+    //가전제품 On
+    socket.on('appliancesOnToServer',(data)=>{
+        socket.to(roomName).emit('appliancesOn',data)
+    })
 
-
-        //임시로 에어컨 켰다는 메시지 다시 클라이언트로 보내기
-        socket.emit('sendSafetyStatus',"에어컨을 켰습니다.")
-    });
-
-
-    socket.on('airconOffToServer', (data) => {
-        console.log("어플리케이션에서 에어컨 끄라고 명령이 왔다")
-        socket.to(roomName).emit('airconOff', data);
-
-        //임시로 에어컨 껐다는 메시지 다시 클라이언트로 보내기
-        socket.emit('sendSafetyStatus',"에어컨을 켰습니다.")
-    });
+    //가전제품 Off
+    socket.on('appliancesOffToServer',(data)=>{
+        socket.to(roomName).emit('appliancesOff',data)
+    })
 
 
-    socket.on('Light1OnToServer', (data) => {
-        console.log("어플리케이션에서 불1 키라고 명령이 왔다")
 
-        //불1 키라고 터틀봇에 명령 내리기~
-        socket.to(roomName).emit('Light1On', data);
-    });
+   
 
 
-    socket.on('Light1OffToServer', (data) => {
-        console.log("어플리케이션에서 불1 끄라고 명령이 왔다")
-
-        //불1 끄라고 터틀봇에 명령 내리기~
-        socket.to(roomName).emit('Light1Off', data);
+    //터틀봇에서 소지품 찾았다고 연락이 온다~
+    socket.on('findBelongingsToServer',(data)=>{
         
-    });
-
-
-    socket.on('Light2OnToServer', (data) => {
-        console.log("어플리케이션에서 불2 키라고 명령이 왔다")
-        //터틀봇에 불2 키라고 명령 보내기
-        socket.to(roomName).emit('Light2On', data);
-    });
-
-
-    socket.on('Light2OffToServer', (data) => {
-        console.log("어플리케이션에서 불2 키라고 명령이 왔다")
-        //터틀봇에 불2 끄라고 명령 보내기~
-        socket.to(roomName).emit('Light2Off', data);
-    });
-
-
-
-
-    socket.on('disconnect', () => {
-        console.log('disconnected from server 111');
-        socket.disconnect();
-    });
-
-    // 전달받은 이미지를 jpg 파일로 저장
-    socket.on('streaming', (message) => {
-        socket.to(roomName).emit('sendStreaming', message);
-        // console.log(message);
-        buffer = Buffer.from(message, "base64");
-        fs.writeFileSync(path.join(picPath, "/../client/cam.jpg"), buffer);
-    });
-
-
-    socket.on('findBelongings',(data)=>{
-        //먼저 애플리케이션에 알람 보내고~
-        socket.to(roomName).emit('alert',"분실물 발견")
 
         //디비에 저장
         console.log("터틀봇에게 분실물 찾았다고 왔다~~")
@@ -189,6 +174,9 @@ io.on('connection', socket => {
                 console.log(err)
             }
         })
+
+        //먼저 애플리케이션에 알람 보내고~
+        socket.to(roomName).emit('alert',"분실물 발견")
 
     })
 
@@ -208,26 +196,102 @@ io.on('connection', socket => {
         })
 
     })
-
+    //모드가 시작된다고 온다.~
     socket.on('modeOnToServer',(data)=>{
         
         //어떤 모드인지 앱에서 온 데이터를 가지고 뽑아내기
-        const mode=data.mode
+        const no=data.no
+        const user_no=data.user_no
+        
+
+        //현재 실행상태 모드 수정
+        DB.query('update current_mode set mode_no=? where user_no=?',[mode,no],(err,data)=>{
+            if(err){
+                console.log(err)
+            }
+        })
+
 
         //모드 번호로 저장된 모드 정보 가져오기
         const sql='select * from mode where no=?'
-        
-        DB.query(sql,mode,(err,data)=>{
+        DB.query(sql,[mode],(err,data)=>{
             if(err){
                 console.log(err)
             }else{
-                
+                var time=data[0].time
+                var day=data[0].day
+                var startH=0
+                var startM=0
+                var endH=0
+                var endM=0
+
+                if(time[0]!='0'){
+                    startH=parseInt(time.substring(0,2))
+                }else if(time[0]=='0'){
+                    startH=parseInt(time[1])
+                }
+
+                if(time[2]!='0'){
+                    startM=parseInt(time.substring(2,4))
+                }else if(time[2]=='0'){
+                    startM=parseInt(time[3])
+                }
+
+                if(time[4]!='0'){
+                    endH=parseInt(time.substring(4,6))
+                }else if(time[4]=='0'){
+                    endH=parseInt(time[5])
+                }
+
+                if(time[6]!='0'){
+                    endM=parseInt(time.substring(6))
+                }else if(time[6]=='0'){
+                    endM=parseInt(time[7])
+                }
+
+                //일정 시간마다 스케쥴링
+                //키는 시간
+                startMode = schedule.scheduleJob(startM+' '+startH+' * * '+day, function(){
+                    socket.to(roomName).emit('modeOn',data[0].iot)
+                });
+                //끄는 시간
+                endMode = schedule.scheduleJob(endM+' '+endH+' * * '+day, function(){
+                    socket.to(roomName).emit('modeOff',data[0].iot)
+                });
+
             }
         })
 
         
 
     })
+    //모드 종료
+    socket.on('modeOffToServer',(data)=>{
+        startMode.cancel()
+        endMode.cancel()
+        const user_no=data.user_no
+        const mode_no=data.mode_no
+        DB.query('update current_mode set mode_no=? where user_no=?',[null,user_no],(err,data)=>{
+            if(err){
+                console.log(err)
+            }
+        })
+
+
+    })
+
+
+    //모든 방 청소 요청
+    socket.on('cleanAllRoomToServer',(data)=>{
+        socket.to(roomName).emit('cleanAllRoom')
+    })
+
+
+
+   //부분 방 청소 요청
+   socket.on('cleanSubRoomToServer',(data)=>{
+
+   })
 
 
 })

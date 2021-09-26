@@ -30,7 +30,7 @@ router.get('/list/:user_no',function(req,res){
         if(err){
             console.log(err)
         }else{
-            return res.status.json({
+            return res.status(200).json({
                 success:true,
                 msg:"침입관리 기록 리스트",
                 data
@@ -39,5 +39,20 @@ router.get('/list/:user_no',function(req,res){
     })
 
 })
+
+// router.delete('list/:no',function(req,res){
+//     const no=req.params.no
+//     const sql='delete from intruders where no=?'
+//     DB.query(sql,[no],(err,data)=>{
+//         if(err){
+//             console.log(err)
+//         }else{
+//             return res.status(200).json({
+//                 success:true,
+//                 msg:"침입 관리 기록 확인 후 삭제",
+//             })
+//         }
+//     })
+// })
 
 module.exports=router;

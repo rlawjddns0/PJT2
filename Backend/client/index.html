@@ -17,9 +17,9 @@
         <br></br>
 
         <!-- 로직 2. 침입자 인지 시점 이미지 뷰어 생성 -->
-
+<!-- 
         <img src="cam.jpg?t=" width='480' onload='setTimeout(function() {src = src.substring(0, (src.lastIndexOf("t=")+2))+(new Date()).getTime()}, 50)'
-        onerror='setTimeout(function() {src = src.substring(0, (src.lastIndexOf("t=")+2))+(new Date()).getTime()}, 50)'/>
+        onerror='setTimeout(function() {src = src.substring(0, (src.lastIndexOf("t=")+2))+(new Date()).getTime()}, 50)'/> -->
 
         <br></br>
         
@@ -45,7 +45,7 @@
         <button type ='button' id="A2-btn", onclick="btn_light2_on()">Light2 On</button>
         <button type ='button' id="A2-btn", onclick="btn_light2_off()">Light2 Off</button>
         <button type ='button' id="A2-btn", onclick="disconnect()">disconnect</button>
-        <button type ='button' id="A2-btn", onclick="connect()">connect</button>
+        <button type ='button' id="A2-btn", onclick="modeOnToServer()">modeOnToServer</button>
 
 
 

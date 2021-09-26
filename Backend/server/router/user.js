@@ -86,11 +86,27 @@ router.post('/register',function(req,res){
                 DB.query('insert into user(`userid`, `email`,`password`) values(?,?,?)',[
                     userid,email,hash
                 ],(err,row)=>{
-                    if(err)console.log(err)
+                    if(err){
+                        console.log(err)
+                    }else{
+                        //검사 다 끝나고 에러 없으면 current_mode에 초기값 집어넣기
+                        DB.query('select * from user where userid=?',[userid],(err,data)=>{
+                            if(err){
+                                console.log(err)
+                            }else{
+                                DB.query('insert into user(user_no,mode_no) values(?,?)',[data.no,null],(err,data)=>{
+                                    if(err){
+                                        console.log(err)
+                                    }
+                                })
+                            }
+                        })
+                        return res.status(200).json({
+                            success:true
+                        })
+                    }
                 })
-                return res.status(200).json({
-                    success:true
-                })
+                
             })
             
         }else{
