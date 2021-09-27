@@ -57,7 +57,7 @@ params_mcl = {
 def compute_relative_pose(pose_i, pose_j):
 
     # 로봇의 상대 좌표에 대한 pose를 내놓는 역할을 합니다
-    
+
     # 로직 순서
     # 1. 두 pose를 기준으로 하는 좌표변환 행렬 정의
     # 2. Rot 행렬, trans 백터 추출

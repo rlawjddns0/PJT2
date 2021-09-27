@@ -7,7 +7,7 @@ from rclpy.node import Node
 import time
 from sensor_msgs.msg import CompressedImage, LaserScan
 from ssafy_msgs.msg import BBox
-
+from ssafy_msgs.msg import ObjectXY
 import tensorflow as tf
 
 from sub2.ex_calib import *
@@ -76,7 +76,9 @@ params_cam = {
 
 class detection_net_class():
     def __init__(self, sess, graph, category_index):
-        
+        # super().__init__('detection_net_class')
+        # self.publisher = self.create_publisher(ObjectXY, 'object_xy', 10)
+
         # 로직 6. object detector 클래스 생성
         # 스켈레톤 코드 내에 작성되어 있는 class인  detection_net_class()는 
         # graph와 라벨정보를 받아서 ROS2 topic 통신으로 들어온 이미지를 inference 하고
@@ -346,11 +348,16 @@ def main(args=None):
 
                 for _ in ostate_list:
                     distance = math.sqrt(math.pow(ostate_list[0][0],2)+math.pow(ostate_list[0][1],2))
+                    
+                    # object 위치 정보 보내기
+                    #
+                    #
+
                     cv2.putText(image_process,str(distance),(30,200), cv2.FONT_HERSHEY_SIMPLEX, 1,(255,255,255), 2, 0)
             image_process = draw_pts_img(image_process, xy_i[:, 0].astype(np.int32),
                                             xy_i[:, 1].astype(np.int32))
 
-            # print(ostate_list)
+            print(ostate_list)
 
         visualize_images(image_process, infer_time)
 

@@ -66,7 +66,7 @@ class HumanDetectorToServer(Node):
 
     def __init__(self):
         super().__init__('detect_to_server')
-
+        # 이미지를 구독
         self.subscription = self.create_subscription(
             CompressedImage,
             '/image_jpeg/compressed',
@@ -83,6 +83,7 @@ class HumanDetectorToServer(Node):
 
         self.human_detected = False
         
+        # 이미지 위치
         self.dir_img = os.path.join("C:\\Users\\multicampus\\Desktop\\S05P21B202\\ros2_smart_home\\src\\security_service\\web\\client", "detect.png")
 
         self.timer = self.create_timer(self.timer_period, self.timer_callback)

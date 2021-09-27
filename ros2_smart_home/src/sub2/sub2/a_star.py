@@ -8,7 +8,7 @@ from nav_msgs.msg import Odometry,OccupancyGrid,MapMetaData,Path
 from math import pi,cos,sin,sqrt
 from collections import deque
 import heapq
-
+from std_msgs.msg import String
 # a_star 노드는  OccupancyGrid map을 받아 grid map 기반 최단경로 탐색 알고리즘을 통해 로봇이 목적지까지 가는 경로를 생성하는 노드입니다.
 # 로봇의 위치(/pose), 맵(/map), 목표 위치(/goal_pose)를 받아서 전역경로(/global_path)를 만들어 줍니다. 
 # goal_pose는 rviz2에서 2D Goal Pose 버튼을 누르고 위치를 찍으면 메시지가 publish 됩니다. 
@@ -32,6 +32,7 @@ class a_star(Node):
         # 로직 1. publisher, subscriber 만들기
         self.map_sub = self.create_subscription(OccupancyGrid,'map',self.map_callback,1)
         self.odom_sub = self.create_subscription(Odometry,'odom',self.odom_callback,1)
+        self.obs_sub = self.create_subscription(String, 'obs_msg', self.obs_callback, 1)
         self.goal_sub = self.create_subscription(PoseStamped,'goal_pose',self.goal_callback,1)
         self.a_star_pub= self.create_publisher(Path, 'global_path', 1)
         time_period=0.1 
@@ -109,9 +110,11 @@ class a_star(Node):
         self.is_map=True
         self.map_msg=msg
 
+    def obs_callback(self, msg):
+        if self.is_odom:
+            print(msg.data)
 
     def goal_callback(self,msg):
-        print(msg)
         if msg.header.frame_id=='map':
             # print(msg)
             '''
@@ -133,12 +136,14 @@ class a_star(Node):
             x=self.odom_msg.pose.pose.position.x
             y=self.odom_msg.pose.pose.position.y
             start_grid_cell=self.pose_to_grid_cell(x,y)
+            # if start_grid_cell[start_grid_cell[0]] == 127 and start_grid_cell[start_grid_cell[1]]:
+                # 현재 위치는 dijkstra가 불가능함을 알리는 pub message를 path_tracking에 전달
 
             self.path = [[0 for col in range(self.GRIDSIZE)] for row in range(self.GRIDSIZE)]
             self.cost = np.array([[self.GRIDSIZE*self.GRIDSIZE for col in range(self.GRIDSIZE)] for row in range(self.GRIDSIZE)])
 
             ## 시작지, 목적지가 탐색가능한 영역이고, 시작지와 목적지가 같지 않으면 경로탐색을 합니다.
-            if self.grid[start_grid_cell[0]][start_grid_cell[1]] ==0  and self.grid[self.goal[0]][self.goal[1]] ==0  and start_grid_cell != self.goal :
+            if self.grid[start_grid_cell[0]][start_grid_cell[1]] == 0 and self.grid[self.goal[0]][self.goal[1]] == 0 and start_grid_cell != self.goal :
                 self.dijkstra(start_grid_cell)
 
 
@@ -178,7 +183,7 @@ class a_star(Node):
             for i in range(8):
                 next = (current[0] + self.dx[i], current[1] + self.dy[i])
                 if next[0] >= 0 and next[1] >= 0 and next[0] < self.GRIDSIZE and next[1] < self.GRIDSIZE:
-                        if self.grid[next[0]][next[1]] < 50: # 50보다 작은 값인 경우 이동 가능한 것으로 본다.
+                        if self.grid[next[0]][next[1]] < 50: # 50보다 작거나 127인 경우 이동 가능한 것으로 본다.
                             deltaCost = self.dCost[i] + self.heuristics(next)
                             if  self.cost[next[0]][next[1]] > self.cost[current[0]][current[1]] + deltaCost:
                                 self.cost[next[0]][next[1]] = self.cost[current[0]][current[1]] + deltaCost

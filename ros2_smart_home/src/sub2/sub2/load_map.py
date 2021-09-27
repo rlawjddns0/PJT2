@@ -81,10 +81,10 @@ class loadMap(Node):
             for y in range(350):
                 if grid[x][y] == 100:
                     # 로직 3. 점유영역 근처 필터처리
-                    for i in range(y-6, y+6):
+                    for i in range(y-5, y+5):
                         if grid[x][i] != 100:
                             grid[x][i] = 127
-                        for j in range(x-6, x+6):
+                        for j in range(x-5, x+5):
                             if grid[j][i] != 100:
                                 grid[j][i] = 127
 

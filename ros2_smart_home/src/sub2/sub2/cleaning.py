@@ -44,7 +44,10 @@ class cleaning(Node):
         self.is_status = False
         self.collision_forward = False
         self.collision_backward = False
-        self.turn_left = False
+        self.turn_right = False
+
+
+        self.map_msg=OccupancyGrid()
         self.odom_msg=Odometry()            
         self.robot_yaw=0.0
         self.robot_yaw_now=0.0 # 회전하기 전 로봇의 각도
@@ -57,71 +60,94 @@ class cleaning(Node):
         self.max_lfd=1.0
 
 
-    def timer_callback(self):
-        # 로봇이 멈춰있는지 여부 확인하기
-        # ???
+        self.out_vel = 0.5
+        self.out_rad_vel = 0.0
 
-        # 이동
-        if self.is_status and self.is_odom == True and not self.turn_left:
+        self.stop_cnt = 0 # 터틀봇이 멈춰 있는지 판단하는 간격을 정하기 위한 변수
+        self.is_stop = False # 터틀봇의 정지 여부 판단
+
+
+
+    def timer_callback(self):
+        # 1. 로봇이 멈춰있는지 여부 확인하기
+        if self.is_status and self.is_odom == True and self.is_stop == True:
+            print("cmd_msg.linear.x: ", self.out_vel)
+            self.out_vel = -0.3
+            self.out_rad_vel = 0.2
+            self.stop_cnt -= 1
+            if self.stop_cnt == 270:
+                self.stop_cnt = 0
+                self.out_rad_vel = 0.0
+                self.is_stop = False
+
+        # 2. 이동
+        if self.is_status and self.is_odom == True and not self.turn_right and not self.is_stop:
             
             # 로봇의 현재 위치를 나타내는 변수
             robot_pose_x = self.odom_msg.pose.pose.position.x
             robot_pose_y = self.odom_msg.pose.pose.position.y
-
-
-            out_vel = 0.5
-            out_rad_vel = 0.0
-            # print("각도차 작을 때: ", theta)
-                
-
-            self.cmd_msg.linear.x = out_vel
-            self.cmd_msg.angular.z = out_rad_vel
-            # 일단 직진
-            self.cmd_pub.publish(self.cmd_msg)
-            print(self.robot_yaw * 180 / pi)                   
+            self.out_vel = 0.5
+            self.out_rad_vel = 0.0            
         
-        # 이유 모르고 터틀봇이 정지해있을 때
-        if self.status_msg.twist.linear.x and robot_yaw의 편차가 매우 작을 때:
-            self.cmd_msg.linear.x = -out_vel # 반대 방향으로 움직이기
-            self.turn_left = True
-            self.cmd_pub.publish(self.cmd_msg)
 
-        # 앞부분이 부딪혔을 때
+        # 3. 앞부분이 부딪혔을 때
         if self.collision_forward:
-            self.cmd_msg.linear.x=-0.1
-            self.turn_left = True # 후진이 끝나면 회전할 것
+            # 미지의 이유로 멈춘게 아니므로 stop_cnt = 0
+            # self.stop_cnt = 0
+            self.out_vel = -0.2 # 후진
+            self.turn_right = True # 후진이 끝나면 회전할 것
             self.robot_yaw_now = self.robot_yaw # 현재 각도 저장
-            # 일단 후진
-            self.cmd_pub.publish(self.cmd_msg)
-            
-        if not self.collision_forward and self.turn_left:
-            self.cmd_msg.linear.x = 0.0
+
+        # 4. 뒷부분이 부딪혔을 때
+        if self.collision_backward:
+            # 미지의 이유로 멈춘게 아니므로 stop_cnt = 0
+            # self.stop_cnt = 0
+            self.out_vel = 0.2 # 전진
+            self.turn_right = True # 전진이 끝나면 회전할 것
+        
+        # 5. 회전(충돌이 해소된 후)
+        if not self.collision_forward and not self.collision_backward and self.turn_right:
+            print("실행")
+            self.out_vel = 0.0
             # self.cmd_msg.angular.z = -0.3
-            self.cmd_msg.angular.z = random.random()
+            self.out_rad_vel = 30 * pi / 180
             self.cnt += 1
-            print(self.cnt)
-            # print("저장 각도: ", self.robot_yaw_now * 180 / pi)
-            # print("현재 각도: ", self.robot_yaw * 180 / pi)
-            # if (self.robot_yaw_now * 180 / pi) + 88 < (self.robot_yaw * 180 / pi) < (self.robot_yaw_now * 180 / pi) + 92:
-                # self.cmd_msg.angular.z = 0.0
-            if self.cnt == 50:
+
+            if self.cnt == 20:
                 
-                self.turn_left = False
+                self.turn_right = False
                 self.cnt = 0
 
-            self.cmd_pub.publish(self.cmd_msg)
-
-        if self.collision_backward:
-            self.cmd_msg.linear.x=0.3
-            self.cmd_msg.angular.z=-0.2
-
-        
+        self.cmd_msg.linear.x = self.out_vel
+        self.cmd_msg.angular.z = self.out_rad_vel
+        self.cmd_pub.publish(self.cmd_msg)
+        print(self.stop_cnt)
 
             
 
     def odom_callback(self, msg):
         self.is_odom=True
         self.odom_msg=msg
+        # 초기값 설정
+        if self.stop_cnt <= 0:
+            self.turtle_pos_x = msg.pose.pose.position.x
+            self.turtle_pos_y = msg.pose.pose.position.y
+            self.stop_cnt = 1
+            print("초기 설정 완료")
+        elif self.stop_cnt > 300:
+            self.is_stop = True
+        else:
+            # 탈출을 시도하기 전 상태, 충돌이 일어난 것이 아닐 때
+            if self.is_stop != True and not self.collision_forward and not self.collision_backward:
+                # 뚜렷한 이유 없이 멈춰있다면
+                if abs(self.turtle_pos_x-msg.pose.pose.position.x) < 0.0001 \
+                and abs(self.turtle_pos_y-msg.pose.pose.position.y) < 0.0001:
+                    print("정지 상태: x {}, y {}".format(self.turtle_pos_x, self.turtle_pos_y))
+                    self.stop_cnt += 1
+                else:
+                    self.turtle_pos_x = msg.pose.pose.position.x
+                    self.turtle_pos_y = msg.pose.pose.position.y
+
 
         # 로직 3. Quaternion 을 euler angle 로 변환
         q = Quaternion(msg.pose.pose.orientation.w, msg.pose.pose.orientation.x, msg.pose.pose.orientation.y, msg.pose.pose.orientation.z)
@@ -181,6 +207,7 @@ class cleaning(Node):
                 print("후방 충돌")
             else:
                 self.collision_backward = False
+
             self.is_lidar = True
 
         
