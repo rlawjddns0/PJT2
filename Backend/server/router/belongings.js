@@ -1,4 +1,3 @@
-const bodyParser=require('body-parser');
 const path=require('path');
 const bcrypt=require('bcrypt')
 const DB=require('../config/DBconfig')
@@ -38,10 +37,9 @@ router.get('/list/:user_no',function(req,res){
 })
 
 //찾은 분실물 체크
-router.post('/check',function(req,res){
-    const body=req.body
+router.put('/check/:no',function(req,res){
     //분실물 번호
-    const no=body.no
+    const no=req.params.no
     //no값의 분실물 찾았다고 flag값 true로 바꾼다.
     DB.query('update belongings set flag=? where no=?',[true,no],
     (err,data)=>{

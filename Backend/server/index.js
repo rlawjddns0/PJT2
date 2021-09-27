@@ -4,10 +4,7 @@ const bcrypt=require('bcrypt')
 const DB=require('./config/DBconfig')
 const saltRounds=10
 const express = require('express');
-const user=require('./router/user')
-const mode=require('./router/mode')
-const intruders=require('./router/intruders')
-const belongings=require('./router/belongings')
+const router=require('./router/index')
 const schedule=require('node-schedule')
 // Websocket 서버 구동을 위한 서버 코드입니다.
 
@@ -40,12 +37,10 @@ var startMode
 var endMode
 
 
+//controller
 //############################# api 시작~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-app.use('/api/user',user)
-app.use('/api/belongings',belongings)
-app.use('/api/mode',mode)
-app.use('/api/intruders',intruders)
+app.use(router)
 
 //########################## 3api 끝~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -95,19 +90,6 @@ io.on('connection', socket => {
     socket.on('PatrolOnToServer', (data) => {
         //security service on~~
         socket.to(roomName).emit('patrolOn')
-
-        const date=new Date()
-        // date = new Date(2021, 9, 26, 5, 1, 0);
-        console.log(date)
-        date.setMinutes(date.getMinutes()+1)
-        console.log(date)
-        const job = schedule.scheduleJob(date, function(){
-            console.log('The world is going to end today.');
-        });
-
-
-
-
 
         //패트롤 작동한다고 다시 메시지 보내기~
         socket.to(roomName).emit('sendPatrolStatus', "시큐리티 서비스 작동");
@@ -276,8 +258,6 @@ io.on('connection', socket => {
                 console.log(err)
             }
         })
-
-
     })
 
 

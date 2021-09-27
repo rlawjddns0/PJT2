@@ -77,13 +77,13 @@ router.post('/register',function(req,res){
 
     DB.query('select * from user where userid=?',[userid],(err,data)=>{
         //디비에 저장된 값이 없으면 비회원
-        if(data.length==0){
+        if(data.length===0){
             //회원가입 전 비밀번호 암호화 해야된다~
             
             console.log("회원가입 가능~")
             bcrypt.hash(password,saltRounds,(error,hash)=>{
                 
-                DB.query('insert into user(`userid`, `email`,`password`) values(?,?,?)',[
+                DB.query('insert into user(userid, email,password) values(?,?,?)',[
                     userid,email,hash
                 ],(err,row)=>{
                     if(err){
@@ -94,7 +94,8 @@ router.post('/register',function(req,res){
                             if(err){
                                 console.log(err)
                             }else{
-                                DB.query('insert into user(user_no,mode_no) values(?,?)',[data.no,null],(err,data)=>{
+                                console.log(data[0].no)
+                                DB.query('insert into current_mode(user_no,mode_no) values(?,?)',[data[0].no,null],(err,data)=>{
                                     if(err){
                                         console.log(err)
                                     }

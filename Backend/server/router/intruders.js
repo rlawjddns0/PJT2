@@ -37,7 +37,6 @@ router.get('/list/:user_no',function(req,res){
             })
         }
     })
-
 })
 
 // router.delete('list/:no',function(req,res){

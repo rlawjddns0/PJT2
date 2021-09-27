@@ -60,4 +60,49 @@ router.get('/customList/:user_no',function(req,res){
 
 })
 
+//모드 삭제
+router.delete('/delete/:no',function(req,res){
+    const no=req.params.no
+    DB.query('delete from mode where no=?',[no],(err,data)=>{
+        if(err){
+            console.log(err)
+        }else{
+            console.log("모드 하나 삭제")
+        }
+    })
+})
+
+//현재 사용자가 실행하고 있는 모드
+router.get('/current_mode/:user_no',function(req,res){
+    const no=req.params.user_no
+    //먼저 사용자 user_no로 커런트 모드에서 가져옴
+    DB.query('select * from current_mode where user_no=?',[user_no],(err,data)=>{
+        if(err){
+            console.log(err)
+        
+        }else if(data.mode_no==null){
+            return res.status(200).json({
+                success:true,
+                msg:"현재 작동중인 모드가 없습니다.",
+                data:null
+            })
+        }
+        else{
+            const mode_no=data.mode_no
+            DB.query('select * from mode where mode_no=?',[mode_no],(err,data)=>{
+                if(err){
+                    console.log(err)
+                }else{
+                    return res.status(200).json({
+                        success:true,
+                        msg:"현재 작동하고 있는 모드",
+                        data,
+                    })
+                }
+            })
+        }
+    })
+})
+
+
 module.exports=router;
