@@ -1,6 +1,6 @@
 import rclpy
 from rclpy.node import Node
-from geometry_msgs.msg import Twist, Point, Point32
+from geometry_msgs.msg import Twist, Point, Point32, Pose, PoseStamped
 from ssafy_msgs.msg import TurtlebotStatus
 from squaternion import Quaternion
 from nav_msgs.msg import Odometry,Path
@@ -9,6 +9,7 @@ import numpy as np
 from sensor_msgs.msg import LaserScan, PointCloud
 from std_msgs.msg import String
 import time
+import random
 # path_tracking 노드는 로봇의 위치(/odom), 로봇의 속도(/turtlebot_status), 주행 경로(/local_path)를 받아서, 주어진 경로를 따라가게 하는 제어 입력값(/cmd_vel)을 계산합니다.
 # 제어입력값은 선속도와 각속도로 두가지를 구합니다. 
 
@@ -32,6 +33,9 @@ class followTheCarrot(Node):
         # 장애물 확인
         self.obs_pub = self.create_publisher(String, 'obs_msg', 1)
 
+        # goal_pose 통신 subscribe
+        self.goal_sub = self.create_subscription(PoseStamped,'goal_pose', self.goal_callback,1)
+
         # 로봇의 현재 위치
         self.subscription = self.create_subscription(Odometry,'/odom',self.odom_callback,10)
         self.status_sub = self.create_subscription(TurtlebotStatus,'/turtlebot_status',self.status_callback,10)
@@ -48,10 +52,15 @@ class followTheCarrot(Node):
 
         self.is_odom = False
         self.is_path = False
+        self.is_goal = False
         self.path_exists = False
         self.is_status = False
+        self.forward = 999
+        self.backward = 999
         self.collision_forward = False
         self.collision_backward = False
+        self.collision_forward_cnt = 0
+        self.collision_backward_cnt = 0
         self.forward_obs = False
         self.backward_obs = False
 
@@ -72,53 +81,20 @@ class followTheCarrot(Node):
         self.out_vel = 0.0 # 탈출을 계속하기 위해 필요함
         self.out_rad_vel = 0.0
 
-        self.cnt = 0
-        self.turn_right = False
+        self.turn_cnt = 0
+        self.go_cnt = 0
+        self.back_cnt = 0
 
         self.state = 1
-        self.go_forward = 0
-        self.go_backward = 0
+
+        # goal 전용
+        self.map_size_x=350
+        self.map_size_y=350
+        self.map_resolution=0.05
+        self.map_offset_x=-8-8.75
+        self.map_offset_y=-4-8.75
 
     def timer_callback(self):
-        # # 1. 경로가 남아있음에도 터틀봇이 정지해있는 경우
-        # if self.is_status and self.is_odom and self.path_exists and self.is_stop:
-        #     self.out_vel = -0.3
-        #     self.out_rad_vel = 0.2
-        #     self.stop_cnt -= 1
-        #     self.cmd_msg.linear.x = self.out_vel
-        #     self.cmd_msg.angular.z = self.out_rad_vel
-
-        #     if self.stop_cnt == 270:
-        #         self.stop_cnt = 0
-        #         self.out_rad_vel = 0.0
-        #         self.is_stop = False
-
-        # # 2. 터틀봇이 잘못된 위치에 있어 정지한 경우(경로가 만들어지지 않음)
-        # if self.is_status and self.is_odom and not self.path_exists and self.is_stop:
-        #     # 전방에 장애물이 없는 곳으로 회전한다.
-        #     if self.forward_obs == True or self.backward_obs:
-        #         self.cmd_msg.angular.z = 0.0
-        #         self.cmd_msg.linear.x = -0.3
-        #         for i in range(10):
-        #             self.cmd_pub.publish(self.cmd_msg)
-        #             print("pub back")
-        #             time.sleep(0.05)
-        #         self.cmd_msg.angular.z = 0.3
-        #         self.cmd_msg.linear.x = 0.0
-        #         for i in range(10):
-        #             self.cmd_pub.publish(self.cmd_msg)
-        #             print("pub rot")
-        #             time.sleep(0.05)
-        #         # 회전이 끝나면 직진
-        #         self.cmd_msg.angular.z = 0.0
-        #         self.cmd_msg.linear.x = 0.2
-        #         for i in range(10):
-        #             self.cmd_pub.publish(self.cmd_msg)
-        #             print("pub forward")
-        #             time.sleep(0.05)
-        #     else:
-        #         pass
-
         # 1. turtlebot이 연결되어 있고, odom이 작동하며, 경로가 있을 때,
         if self.is_status and self.is_odom and self.is_path:
             # 남은 경로가 1 이상이면
@@ -188,57 +164,77 @@ class followTheCarrot(Node):
                     
                     # 1. normal state(경로를 잘 따라 가는 경우)
                     if self.state == 1:
-                        print("state1")
+                        # print("state1")
                         if 0.2 < abs(theta):
                             self.out_vel = 0.0
                             self.out_rad_vel = theta * 0.35
                         else:
                             self.out_vel = 0.5
                             self.out_rad_vel = theta * 0.35
-                    # 2. 전방에 장애물 존재하는 경우 우회해야 함
-                    # elif self.state == 2:
-                    #     # 잠시 멈춰서 회전
-                    #     print("state2")
-                    #     self.out_vel = 0.0
-                    #     self.out_rad_vel = 0.2
-                    # if self.go_backward > 0:
-                    #     self.out_vel = 0.3
-                    #     self.out_rad_vel = 0.0
-                    #     self.go_backward -= 1
-                    # if self.go_forward > 0:
-                    #     self.out_vel = 0.3
-                    #     self.out_rad_vel = 0.0
-                    #     self.go_forward -= 1
+                        
+                    # 전방 충돌 상황
+                    if self.state == 2:
+                        self.out_vel = -0.5
+                        self.out_rad_vel = 0.0
+                        # 일정 거리 이상 충돌로부터 멀어진 경우
+                        if self.forward > 0.5:
+                            self.turn_cnt = 20
+                            self.state = 8 # 회전 조건
+                    # 후방 충돌 상황
+                    if self.state == 3:
+                        self.out_vel = 0.5
+                        self.out_rad_vel = 0.0
+                        # 일정 거리 이상 충돌로부터 멀어진 경우
+                        if self.backward > 0.5:
+                            self.turn_cnt = 20
+                            self.state = 8 # 회전 조건
 
-                    # # 앞부분이 부딪혔을 때
-                    # if self.collision_forward:
-                    #     self.out_vel = -0.2 # 후진
-                    #     self.turn_right = True # 후진이 끝나면 회전할 것
-                    #     self.robot_yaw_now = self.robot_yaw # 현재 각도 저장
-                    # # 뒷부분이 부딪혔을 때
-                    # if self.collision_backward:
-                    #     print("충돌 극복 동작")
-                    #     self.out_vel = 0.2 # 전진
-                    #     self.turn_right = True # 전진이 끝나면 회전할 것
-                  
-                    # # 회전(충돌이 해소된 후)
-                    # if not self.collision_forward and not self.collision_backward and self.turn_right:
-                    #     print("회전 실행")
-                    #     self.out_vel = 0.0
-                    #     # self.cmd_msg.angular.z = -0.3
-                    #     self.out_rad_vel = 45 * pi / 180
-                    #     self.cnt += 1
+                    # 오른쪽 방향으로 회전
+                    if self.state == 8 and self.turn_cnt > 0:
+                        self.out_vel = 0.0
+                        self.out_rad_vel = 20* pi / 180
+                        self.turn_cnt -= 1
+                        # 회전 종료 조건
+                        if self.turn_cnt == 0:
+                            print("회전 종료")
+                            self.state = 6 # 직진 조건
+                            self.go_cnt = 30
+                            self.out_rad_vel = 0.0
+                    # 직진
+                    if self.state == 6 and self.go_cnt > 0:
+                        self.out_vel = 0.5
+                        self.out_rad_vel = 0.0
+                        self.go_cnt -= 1
+                        if self.go_cnt == 0:
+                            print("직진 종료")
+                            self.state = 1
+                    # 후진(아직 사용은 안함)
+                    if self.state == 7 and self.go_cnt > 0:
+                        self.out_vel = -0.5
+                        self.out_rad_vel = 0.0
+                        self.back_cnt -= 1
 
-                    #     if self.cnt == 20:
-                            
-                    #         self.turn_right = False
-                    #         self.cnt = 0
-                   
                     self.cmd_msg.linear.x = self.out_vel
                     self.cmd_msg.angular.z = self.out_rad_vel
                     self.cmd_pub.publish(self.cmd_msg)
                     # print("linear.x: ", self.out_vel)
                     # print("angular.z: ", self.out_rad_vel)
+            # 목적지는 있는데 경로가 만들어지지 않는 경우(터틀봇이 잘못된 위치에 있음)
+            elif self.is_status and self.is_odom and self.is_goal and (self.goal != self.current_pos) and not self.path_exists:
+                print("통과!")
+                # 목적지가 있으면 goal_pose 통신이 이루어진다.
+                # 전방, 후방 lidar distance 확인 후 더 먼 쪽으로 이동한다.
+                if self.forward > self.backward:
+                    self.out_vel = 0.5
+                    self.out_rad_vel = 0.1
+                else:
+                    self.out_vel = -0.5
+                    self.out_rad_vel = 0.1
+                self.cmd_msg.linear.x = self.out_vel
+                self.cmd_msg.angular.z = self.out_rad_vel
+                self.cmd_pub.publish(self.cmd_msg)
+                print("x", self.out_vel)
+                print("angular", self.out_rad_vel)
 
             # 경로가 없을 때
             else:
@@ -248,38 +244,57 @@ class followTheCarrot(Node):
                 self.cmd_msg.linear.x=0.0
                 self.cmd_msg.angular.z=0.0
                 self.cmd_pub.publish(self.cmd_msg)
-
+            if random.randint(0, 31) > 27:
+                self.out_vel = 0.5
+                self.out_rad_vel = 0.1
+                self.cmd_msg.linear.x = self.out_vel
+                self.cmd_msg.angular.z = self.out_rad_vel
+                self.cmd_pub.publish(self.cmd_msg)
+            elif random.randint(0, 30) < 3:
+                self.out_vel = -0.5
+                self.out_rad_vel = -0.1
+                self.cmd_msg.linear.x = self.out_vel
+                self.cmd_msg.angular.z = self.out_rad_vel
+                self.cmd_pub.publish(self.cmd_msg)
 
     def odom_callback(self, msg):
         self.is_odom=True
+        print("상태: ", self.state)
         self.odom_msg=msg
-        # 초기값 설정
+        self.current_x, self.current_y = self.pose_to_grid_cell(self.odom_msg.pose.pose.position.x, self.odom_msg.pose.pose.position.y)
+        self.current_pos = [self.current_x, self.current_y]
+        # print("self.state", self.state)
+        # 정지 상태 - 초기값 설정
+        print(self.stop_cnt)
         if self.stop_cnt <= 0:
             self.turtle_pos_x = msg.pose.pose.position.x
             self.turtle_pos_y = msg.pose.pose.position.y
-            self.turtle_yaw = self.robot_yaw
             self.stop_cnt = 1
+        # stop_cnt가 300 이상이면 완전 정지 상태로 판단
         elif self.stop_cnt > 300:
             self.is_stop = True
-            # 주변 영역을 갈 수 없는 곳으로 처리하기 (value = 127)
-            # 맵 자체를 다시 쓸 수는 없으니 grid 선에서 처리해야 함
-            obs_msg = String()
-            obs_msg.data = "obstacle_detected"
-            self.obs_pub.publish(obs_msg)
-
+            self.state = 2
+            self.stop_cnt = 0
         else:
+            # stop_cnt가 1에서 300 이하인 경우 현재 멈춰있는지 판단해야 함
             # 탈출을 시도하기 전 상태, 충돌이 일어난 것이 아닐 때
-            if self.is_stop != True and not self.collision_forward and not self.collision_backward and self.path_exists:
-                # 뚜렷한 이유 없이 멈춰있다면
-                if abs(self.turtle_pos_x-msg.pose.pose.position.x) < 0.00001 \
-                and abs(self.turtle_pos_y-msg.pose.pose.position.y) < 0.00001:
-                    if abs(self.robot_yaw - self.turtle_yaw) < 0.001:
-                        self.stop_cnt += 1
-                        print(self.stop_cnt)
+            if not self.collision_forward and not self.collision_backward:
+                # 저장해놓은 위치와 현재 위치 사이의 거리를 계산
+                distance = sqrt((self.turtle_pos_x-msg.pose.pose.position.x) ** 2 + \
+                (self.turtle_pos_y-msg.pose.pose.position.y) ** 2)
+                # 거리 차이가 매우 작으면 현재 정지 상태로 판단
+                # print(distance)
+                if distance < 0.0001:
+                    self.stop_cnt += 1 # 정지 상태가 일정 시간 지나면 탈출 로직 작동
                 else:
                     self.turtle_pos_x = msg.pose.pose.position.x
                     self.turtle_pos_y = msg.pose.pose.position.y
-                    self.turtle_yaw = self.robot_yaw
+                    self.is_stop = False
+                    self.stop_cnt -= 5 # 잠깐이라도 정지 상태가 풀리면 정지 상태 감소,
+                    # 초기화 하고 싶지만 누적 오차때문에 distance가 점점 커지므로 
+                    # 초기화하면 stop_cnt가 특정 값에 도달하지 못해 영영 안 움직일 수 있다.
+                    if self.stop_cnt < 0:
+                        self.stop_cnt = 0
 
         # 로직 3. Quaternion 을 euler angle 로 변환
         q = Quaternion(msg.pose.pose.orientation.w, msg.pose.pose.orientation.x, msg.pose.pose.orientation.y, msg.pose.pose.orientation.z)
@@ -334,47 +349,55 @@ class followTheCarrot(Node):
 
             # 전/후방 충돌 감지
             self.collision = False
-            forward_right = self.lidar_msg.ranges[0:10] # 정면의 라이다 값
-            forward_left = self.lidar_msg.ranges[350:360]
+            forward_right = self.lidar_msg.ranges[0:5] # 정면의 라이다 값
+            forward_left = self.lidar_msg.ranges[356:360]
+
             # 만약 앞쪽이 부딪혔다면 forward_right와 forward_left의 평균을 낸 값이 0.1 이하일 것이다.
-            forward = (sum(forward_right) + sum(forward_left)) / 20
-            print("forward: ", forward)
-            if forward < 0.1:
-                self.collision_forward = True
+            self.forward = (sum(forward_right) + sum(forward_left)) / 9
+            if self.forward < 0.1:
+                self.collision_forward_cnt += 1
+                if self.collision_forward_cnt == 10: # robust하게 만들기 위함
+                    self.collision_forward = True
+                    self.state = 2
+                    self.collision_forward_cnt = 0  # 초기화
                 print("전방 충돌")
             else:
                 self.collision_forward = False
-            backward = self.lidar_msg.ranges[170:190]
-            backward = sum(backward) / 20
-            if backward < 0.1:
-                self.collision_backward = True
+
+            backward = self.lidar_msg.ranges[176:185]
+            self.backward = sum(backward) / 9
+            if self.backward < 0.1:
+                self.collision_backward_cnt += 1
+                if self.collision_backward_cnt == 10:
+                    self.collision_backward = True
+                    self.state = 3
+                    self.collision_backward_cnt = 0 
                 print("후방 충돌")
             else:
                 self.collision_backward = False
-            
-            # 조금 더 넓은 범위로, 전방에 물체나 벽이 있는지 확인하기
-            if forward < 1.0:
-                print("전방 물체 감지")
-                self.forward_obs = True
-                self.state = 2
 
-                if self.go_backward == 1:
-                    self.go_forward = 10
+    def goal_callback(self,msg):
+        self.is_goal = True
+        if msg.header.frame_id=='map':
+            goal_x=msg.pose.position.x
+            goal_y=msg.pose.position.y
+            goal_cell=self.pose_to_grid_cell(goal_x,goal_y)
+            self.goal = [goal_cell[0], goal_cell[1]] 
+            print("목표 지점: ", self.goal)
 
-            elif forward > 2.0:
-                self.forward_obs = False
-                # state2에서 다시 state1로 바뀐 경우 장애물이 없는 방향으로 회전을 완료한 것
-                if self.state == 2:
-                    # 열 번 직진 명령을 내려라
-                    self.go_backward = 10
-                self.state= 1
-            # if backward < 0.5:
-            #     print("후방 물체 감지")
-            #     self.backward_obs = True
-            #     self.state = 3
-            # else:
-            #     self.backward_obs = False
-            #     self.state = 1
+    # goal callback용
+    def pose_to_grid_cell(self,x,y):
+
+        map_point_x=0
+        map_point_y=0  
+        '''
+        로직 4. 위치(x,y)를 map의 grid cell로 변환 
+        (테스트) pose가 (-8,-4)라면 맵의 중앙에 위치하게 된다. 따라서 map_point_x,y 는 map size의 절반인 (175,175)가 된다.
+        pose가 (-16.75,-12.75) 라면 맵의 시작점에 위치하게 된다. 따라서 map_point_x,y는 (0,0)이 된다.
+        '''
+        map_point_x= int(( x - self.map_offset_x ) / self.map_resolution)
+        map_point_y= int(( y - self.map_offset_y ) / self.map_resolution)
+        return map_point_x,map_point_y
 
         
 def main(args=None):

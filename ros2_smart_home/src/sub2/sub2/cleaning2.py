@@ -37,7 +37,7 @@ class cleaning(Node):
     def path_callback(self, msg):
         # 더 이상 경로가 없을 때
         self.path_msg=msg
-        if len(self.path_msg.poses) < 3:
+        if len(self.path_msg.poses) < 5: # 도착 조건을 약간 느슨하게 하는게 좋을 듯..
             self.path_exists = False
         else:
             self.path_exists = True
