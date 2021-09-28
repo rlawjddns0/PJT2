@@ -125,7 +125,10 @@ function modeOnToServer() {
 
     socket.emit('modeOnToServer', data);
 };
-
+function cleaner_on() {
+    console.log('Cleaner on!')
+    socket.emit('cleanerOnToServer')
+}
 
 
 // //앱에서 연결 해제

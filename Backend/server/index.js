@@ -6,6 +6,7 @@ const saltRounds=10
 const express = require('express');
 const router=require('./router/index')
 const schedule=require('node-schedule')
+const {spawn}=require('child_process')
 // Websocket 서버 구동을 위한 서버 코드입니다.
 
 // 노드 로직 순서
@@ -87,6 +88,10 @@ io.on('connection', socket => {
         socket.to(roomName).emit('sendPatrolStatus', message);
     });
 
+    socket.on('airconOnToServer',(message)=>{
+        socket.to(roomName).emit('sendAirConOn', "sdfsfd");
+    })
+
     socket.on('PatrolOnToServer', (data) => {
         //security service on~~
         socket.to(roomName).emit('patrolOn')
@@ -99,7 +104,7 @@ io.on('connection', socket => {
     socket.on('PatrolOffToServer', (data) => {
         //security service off~
         socket.to(roomName).emit('patrolOff', data);
-
+        socket.broadcast.emit('sendPatrolStatus', "dsdfsdssfsfdsfs");
         
         //패트롤 작동한다고 다시 메시지 보내기~
         socket.emit('sendPatrolStatus', "시큐리티 서비스 중지");
@@ -123,16 +128,12 @@ io.on('connection', socket => {
     });
 
 
-    //가전제품 On
-    socket.on('appliancesOnToServer',(data)=>{
-        socket.to(roomName).emit('appliancesOn',data)
+    //가전제품 상태변화
+    socket.on('appliancesChangeToServer',(data)=>{
+        socket.to(roomName).emit('appliancesChangeToServer',data)
     })
 
-    //가전제품 Off
-    socket.on('appliancesOffToServer',(data)=>{
-        socket.to(roomName).emit('appliancesOff',data)
-    })
-
+ 
 
 
    
@@ -163,7 +164,7 @@ io.on('connection', socket => {
     })
 
     //침입자 발견시
-    socket.on('findIntruder',(data)=>{
+    socket.on('findIntruderToServer',(data)=>{
         //먼저 애플리케이션에 알람 보내고~
         socket.to(roomName).emit('alert',"침입자 발견")
         const user_no=data.user_no
@@ -234,11 +235,11 @@ io.on('connection', socket => {
                 //일정 시간마다 스케쥴링
                 //키는 시간
                 startMode = schedule.scheduleJob(startM+' '+startH+' * * '+day, function(){
-                    socket.to(roomName).emit('modeOn',data[0].iot)
+                    socket.to(roomName).emit('modeStart',data[0].iot)
                 });
                 //끄는 시간
                 endMode = schedule.scheduleJob(endM+' '+endH+' * * '+day, function(){
-                    socket.to(roomName).emit('modeOff',data[0].iot)
+                    socket.to(roomName).emit('modeStop',data[0].iot)
                 });
 
             }
@@ -258,6 +259,8 @@ io.on('connection', socket => {
                 console.log(err)
             }
         })
+        socket.to(roomName).emit('modeOff',data[0].iot)
+
     })
 
 
@@ -267,7 +270,29 @@ io.on('connection', socket => {
     })
 
 
-
+    socket.on('cleanerOnToServer', () => {
+        // 명령어, 그냥 결과를 보기 위한 함수,
+        // 'call C:/dev/ros2_eloquent/setup.bat && call C:/Users/multicampus/Desktop/S05P21B202/ros2_smart_home/install/local_setup.bat && odom.py'
+        // {cwd: 'C:/Users/multicampus/Desktop/S05P21B202/ros2_smart_home/src/sub2/sub2/'
+        console.log("청소 시작")
+        const opt = {
+            shell: true,
+            cwd: 'C:/Users/multicampus/Desktop/pjt2/day20210906/S05P21B202/ros2_smart_home/src/sub2/sub2'
+        }
+        const child = spawn('call C:/dev/ros2_eloquent/setup.bat && call C:/Users/multicampus/Desktop/pjt2/day20210906/S05P21B202/ros2_smart_home/install/local_setup.bat && load_map.py', opt)
+        child.stderr.on('data', function (data) {
+            console.error("STDERR:", data.toString());
+          });
+          child.stdout.on('data', function (data) {
+            console.log("STDOUT:", data.toString());
+          });
+          child.on('exit', function (exitCode) {
+            console.log("Child exited with code: " + exitCode);
+          });
+          console.log("실행~")
+        
+        // socket.to(roomName).emit('cleanerOn'); // 일단 소켓에 cleanerOn을 보내긴 하는데 안쓸 수도?
+    })
    //부분 방 청소 요청
    socket.on('cleanSubRoomToServer',(data)=>{
 
