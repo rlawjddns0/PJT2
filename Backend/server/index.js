@@ -276,6 +276,7 @@ io.on('connection', socket => {
         // {cwd: 'C:/Users/multicampus/Desktop/S05P21B202/ros2_smart_home/src/sub2/sub2/'
         console.log("청소 시작")
         const opt = {
+            
             shell: true,
             cwd: 'C:/Users/multicampus/Desktop/pjt2/day20210906/S05P21B202/ros2_smart_home/src/sub2/sub2'
         }
