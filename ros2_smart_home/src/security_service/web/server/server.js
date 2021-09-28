@@ -30,6 +30,9 @@ server.listen(port, () => {
 
 const roomName = 'team';
 
+// child process for launching python file
+const { spawn } = require('child_process')
+
 io.on('connection', socket => {
     socket.join(roomName);
 
@@ -62,6 +65,28 @@ io.on('connection', socket => {
     socket.on('turnrightToServer', (data) => {
         socket.to(roomName).emit('turnright', data);
     });
+
+    socket.on('cleanerOnToServer', () => {
+        // 명령어, 그냥 결과를 보기 위한 함수,
+        // 'call C:/dev/ros2_eloquent/setup.bat && call C:/Users/multicampus/Desktop/S05P21B202/ros2_smart_home/install/local_setup.bat && odom.py'
+        // {cwd: 'C:/Users/multicampus/Desktop/S05P21B202/ros2_smart_home/src/sub2/sub2/'
+        const opt = {
+            shell: true,
+            cwd: 'C:/Users/multicampus/Desktop/S05P21B202/ros2_smart_home/src/sub2/sub2/'
+        }
+        const child = spawn('call C:/dev/ros2_eloquent/setup.bat && call C:/Users/multicampus/Desktop/S05P21B202/ros2_smart_home/install/local_setup.bat && load_map.py', opt)
+        child.stderr.on('data', function (data) {
+            console.error("STDERR:", data.toString());
+          });
+          child.stdout.on('data', function (data) {
+            console.log("STDOUT:", data.toString());
+          });
+          child.on('exit', function (exitCode) {
+            console.log("Child exited with code: " + exitCode);
+          });
+        
+        // socket.to(roomName).emit('cleanerOn'); // 일단 소켓에 cleanerOn을 보내긴 하는데 안쓸 수도?
+    })
 
     socket.on('disconnect', () => {
         console.log('disconnected from server');

@@ -202,7 +202,7 @@ class followTheCarrot(Node):
                             self.out_rad_vel = 0.0
                     # 직진
                     if self.state == 6 and self.go_cnt > 0:
-                        self.out_vel = 0.5
+                        self.out_vel = 1.0
                         self.out_rad_vel = 0.0
                         self.go_cnt -= 1
                         if self.go_cnt == 0:
@@ -246,13 +246,13 @@ class followTheCarrot(Node):
                 self.cmd_pub.publish(self.cmd_msg)
             if random.randint(0, 31) > 27:
                 self.out_vel = 0.5
-                self.out_rad_vel = 0.1
+                self.out_rad_vel = 0.3
                 self.cmd_msg.linear.x = self.out_vel
                 self.cmd_msg.angular.z = self.out_rad_vel
                 self.cmd_pub.publish(self.cmd_msg)
             elif random.randint(0, 30) < 3:
                 self.out_vel = -0.5
-                self.out_rad_vel = -0.1
+                self.out_rad_vel = -0.3
                 self.cmd_msg.linear.x = self.out_vel
                 self.cmd_msg.angular.z = self.out_rad_vel
                 self.cmd_pub.publish(self.cmd_msg)

@@ -68,3 +68,8 @@ function btn_turn_right() {
 
     socket.emit('turnrightToServer', data);
 };
+
+function cleaner_on() {
+    console.log('Cleaner on!')
+    socket.emit('cleanerOnToServer')
+}

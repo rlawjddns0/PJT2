@@ -107,7 +107,7 @@ class cleaning(Node):
                     self.j = 0
                 if self.i >= 350:
                     print("모두 청소 완료!")
-                    global_planner.destroy_node()
+                    
                     rclpy.shutdown()
 
 def main(args=None):
@@ -115,7 +115,6 @@ def main(args=None):
 
     global_planner = cleaning()
     rclpy.spin(global_planner)
-
 
     global_planner.destroy_node()
     rclpy.shutdown()
