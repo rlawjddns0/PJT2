@@ -278,6 +278,7 @@ io.on('connection', socket => {
 
         const opt = {
             shell: true,
+            
             cwd: 'C:/Users/multicampus/Desktop/pjt2/day20210906/S05P21B202/ros2_smart_home/src/sub2/sub2'
         }
         const child = spawn('call C:/dev/ros2_eloquent/setup.bat && call C:/Users/multicampus/Desktop/pjt2/day20210906/S05P21B202/ros2_smart_home/install/local_setup.bat && load_map.py', opt)
