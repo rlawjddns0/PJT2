@@ -21,4 +21,3 @@ EXPOSE 80 3000
 #컨테이너에서 실행될 명령을 지정
 CMD ["npm","run","backend"]
 
-
