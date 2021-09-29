@@ -1,5 +1,5 @@
 #어떤 이미지로부터 새로운 이미지를 생성할지를 지정
-FROM node:6.5.0
+FROM node:14.17.3
 
 #Dockerfile 을 생성/관리하는 사람
 MAINTAINER KIM JEONGWOON <rlawjddns@naver.com>
