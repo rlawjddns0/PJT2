@@ -139,21 +139,21 @@ io.on('connection', socket => {
         //path_tracking(가전제품 위치)
         //goal_change
 
-        const opt = {
-            shell: true,
-            cwd: '../ros2_smart_home/src/sub2'
-        }
-        const child = spawn('call C:/dev/ros2_eloquent/setup.bat && call C:/Users/multicampus/Desktop/Backend/S05P21B202/ros2_smart_home/install/local_setup.bat && cd ../../ros2_smart_home/src/final/launch && ros2 launch appliances_change_launch.py', opt)
-        child.stderr.on('data', function (data) {
-            console.error("STDERR:", data.toString());
-          });
-          child.stdout.on('data', function (data) {
-            console.log("STDOUT:", data.toString());
-          });
-          child.on('exit', function (exitCode) {
-            console.log("Child exited with code: " + exitCode);
-          });
-          console.log("실행~")
+        // const opt = {
+        //     shell: true,
+        //     cwd: '../ros2_smart_home/src/sub2'
+        // }
+        // const child = spawn('call C:/dev/ros2_eloquent/setup.bat && call C:/Users/multicampus/Desktop/Backend/S05P21B202/ros2_smart_home/install/local_setup.bat && cd ../../ros2_smart_home/src/final/launch && ros2 launch appliances_change_launch.py', opt)
+        // child.stderr.on('data', function (data) {
+        //     console.error("STDERR:", data.toString());
+        //   });
+        //   child.stdout.on('data', function (data) {
+        //     console.log("STDOUT:", data.toString());
+        //   });
+        //   child.on('exit', function (exitCode) {
+        //     console.log("Child exited with code: " + exitCode);
+        //   });
+        //   console.log("실행~")
 
 
 
