@@ -14,6 +14,7 @@ params_cam_0 = {
     "HEIGHT": 240, # image height
     "FOV": 60, # Field of view
     "localIP": "127.0.0.1",
+    # "localIP": '172.26.8.18',
     "localPort": 1232,
     "Block_SIZE": int(65535),
     "UnitBlock_HEIGHT": int(30),

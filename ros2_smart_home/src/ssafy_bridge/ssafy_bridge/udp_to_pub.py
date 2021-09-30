@@ -11,6 +11,7 @@ from sensor_msgs.msg import BatteryState, Imu
 from ssafy_msgs.msg import EnviromentStatus,TurtlebotStatus,CustomObjectInfo
 
 user_ip='127.0.0.1'
+# user_ip = '172.26.8.18'
 
 class ssafy_bridge(Node):
 
