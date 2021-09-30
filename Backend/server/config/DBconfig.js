@@ -6,6 +6,7 @@ var DB = mysql.createConnection({
     database : 'ssafy_app_db'
 });
 
+
 DB.connect()
 
 module.exports=DB;
