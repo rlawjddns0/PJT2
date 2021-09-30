@@ -5,6 +5,7 @@ import {MaterialIcons} from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import * as Permissions from 'expo-permissions';
 
+
 const Container = styled.View`
     align-self: center;
     margin-bottom: 30px;

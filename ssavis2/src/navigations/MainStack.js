@@ -1,7 +1,7 @@
 import React, { useContext } from 'react';
 import { ThemeContext } from 'styled-components/native';
 import { createStackNavigator } from '@react-navigation/stack';
-import { Channel, ChannelCreation, Main, AppControll,Cleaning} from '../screens';
+import { Channel, ChannelCreation, Main, AppControll, Cleaning, PartCleaning, Appliance, LostItem, Invasion, ItemDetail} from '../screens';
 import { LinearGradient } from 'expo-linear-gradient';
 import { lightTheme } from '../theme';
 // import MainTab from './MainTab';
@@ -43,6 +43,11 @@ const MainStack = () => {
             <Stack.Screen name="Main" component={Main}  options={{headerShown:false}} />
             <Stack.Screen name="AppControll" component={AppControll} options={{headerTitle:"가전"}}/>
             <Stack.Screen name="Cleaning" component={Cleaning} options={{headerTitle:"청소"}}/>
+            <Stack.Screen name="PartCleaning" component={PartCleaning} options={{headerTitle:"청소"}}/>
+            <Stack.Screen name="Appliance" component={Appliance} options={{headerTitle:"가전"}}/>
+            <Stack.Screen name="LostItem" component={LostItem} options={{headerTitle:"분실물"}}/>
+            <Stack.Screen name="Invasion" component={Invasion} options={{headerTitle:"침입 관리"}}/>
+            <Stack.Screen name="ItemDetail" component={ItemDetail} options={{headerTitle:"분실물"}}/>
             <Stack.Screen name="Channel Creation" component={ChannelCreation} />
             <Stack.Screen name="Channel" component={Channel}/>
         </Stack.Navigator>

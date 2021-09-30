@@ -1,6 +1,6 @@
 import React,{ useContext } from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { Main, Mode, Settings } from '../screens';
+import { Main, Mode, Settings,Voice } from '../screens';
 import { ThemeContext } from 'styled-components/native';
 import {Ionicons} from '@expo/vector-icons';
 import MainStack from './MainStack';
@@ -38,6 +38,17 @@ const MainTab = ({onDarkModeChange, darkMode}) => {
                     tabBarIcon: ({focused}) => (
                         <Ionicons
                         name="ios-location"
+                        style={{ color: focused ? theme.tabIconFocused : theme.tabIcon}}
+                        size={30}
+                        />
+                    )
+                }}
+            />
+            <Tab.Screen name="Voice" component={Voice}
+            options={{
+                    tabBarIcon: ({focused}) => (
+                        <Ionicons
+                        name="mic"
                         style={{ color: focused ? theme.tabIconFocused : theme.tabIcon}}
                         size={30}
                         />

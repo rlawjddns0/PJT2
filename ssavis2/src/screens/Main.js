@@ -1,13 +1,15 @@
 import React, {useContext} from 'react';
 import styled from 'styled-components/native';
 import { Text, Button, StyleSheet } from 'react-native';
-import { MainButton, MainHeader } from '../components';
+import { MainHeader } from '../components';
 import { images } from '../utils/images';
 import { LinearGradient } from 'expo-linear-gradient';
 import { UserContext } from '../contexts';
 import { getCurrentUser } from '../utils/firebase';
 import { ThemeContext } from 'styled-components/native';
 import { lightTheme } from '../theme';
+import MainButton from '../components/MainButton';
+
 const Header = styled.SafeAreaView`
     position:absolute;
     left:5px;
@@ -19,6 +21,7 @@ const HeaderText = styled.Text`
     color : white;
     box-shadow: 0 2px 4px grey;
     margin-left:15%;
+    
 `;
 const Container = styled.View`
     flex:1;
@@ -33,8 +36,8 @@ const MainContainer = styled.View`
 `;
 const SubContainer = styled.View`
     flex:1;
-
     align-items:center;
+    justify-content:center;
 `;
 const ButtonContainer = styled.View`
     flex:2;
@@ -44,8 +47,8 @@ const ButtonContainer = styled.View`
 const StyledText = styled.Text`
     font-size: 24px;
     color : ${({theme}) => theme.Maintext};
-    font-family: ${({theme}) => theme.font};
-    padding:5px;
+    font-weight:bold;
+    margin:5px;
 `;
 
 const SubText = styled.Text`
@@ -70,12 +73,12 @@ const Main = ({navigation}) => {
             <Text style={{fontSize:16, color:'grey'}}>무엇을 도와드릴까요?</Text>
             </SubContainer>
             <ButtonContainer>
-                <MainButton uri={ theme==lightTheme ? images.cleaning : images.lostItemG} title="청소" onPress={() => navigation.navigate('Cleaning')} imgStyle={{height:50, width:50}}/>
-                <MainButton uri={ theme==lightTheme ? images.appliance : images.applianceG} title="가전" onPress={() => navigation.navigate('AppControll')} imgStyle={{height:40, width:50,marginTop:10}}/>
+                <MainButton uri={ theme==lightTheme ? images.cleaning : images.cleaningG} title="청소" onPress={() => navigation.navigate('Cleaning')} imgStyle={{height:50, width:50}}/>
+                <MainButton uri={ theme==lightTheme ? images.appliance : images.applianceG} title="가전" onPress={() => navigation.navigate('Appliance')} imgStyle={{height:40, width:50,marginTop:10}}/>
             </ButtonContainer>
             <ButtonContainer>
-                <MainButton uri={ theme==lightTheme ? images.lostItem : images.lostItemG} title="분실물" onPress={() => navigation.navigate('Channel Creation')} imgStyle={{height:50, width:50}}/>
-                <MainButton uri={ theme==lightTheme ? images.invasion : images.invasionG} title="침입 관리" onPress={() => navigation.navigate('Channel Creation')} imgStyle={{height:50, width:50}}/>
+                <MainButton uri={ theme==lightTheme ? images.lostItem : images.lostItemG} title="분실물" onPress={() => navigation.navigate('LostItem')} imgStyle={{height:50, width:50}}/>
+                <MainButton uri={ theme==lightTheme ? images.invasion : images.invasionG} title="침입 관리" onPress={() => navigation.navigate('Invasion')} imgStyle={{height:50, width:50}}/>
             </ButtonContainer>
         </MainContainer>
         </Container>

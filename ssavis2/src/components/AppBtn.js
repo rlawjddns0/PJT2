@@ -2,40 +2,44 @@ import React from "react";
 import styled from 'styled-components/native';
 import PropTypes from 'prop-types';
 import { Icon } from '../components';
+import { Switch } from 'react-native';
 
-const Container = styled.TouchableOpacity`
+const Container = styled.View`
     background-color: ${({ theme }) => theme.mainButtonBack};
-    align-items: center;
-    justify-content:center;
     border-radius: 20px;
-    flex : 1;
+    align-items:center;
     padding: 10px;
-    margin:10px;
+    flex-direction:row;
+    margin-top:30px;
+    margin-left:30px;
+    margin-right:30px;
     box-shadow: 0px 6px 6px grey; 
-    elevation: 4;
 `;
 
 const Title = styled.Text`
     
     font-size: 28px;
     color: ${({ theme }) => theme.mainButton};
+    padding-left:5%;
     padding-bottom:5px;
     font-family: ${({ theme }) => theme.font};
     font-weight: bold;
 `;
 
-const MainButton = ({uri, title, onPress, imgStyle}) => {
+const AppBtn = ({uri, title, imgStyle, cStyle, appStatus, appStatusChange}) => {
     return (
-        <Container onPress={onPress}>
+        <Container style={cStyle}>
             <Icon url={uri} imageStyle={imgStyle}/>
             <Title>{title}</Title>
+            <Switch style={{ position:'absolute', right:20}} value={appStatus} onValueChange={appStatusChange}/>
         </Container>
     );
 };
 
-MainButton.propTypes = {
+AppBtn.propTypes = {
     title: PropTypes.string,
-    onPress: PropTypes.func.isRequired,
+    imgStyle: PropTypes.object,
+    cStyle: PropTypes.object,
 };
 
-export default MainButton;
+export default AppBtn;

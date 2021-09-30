@@ -7,13 +7,12 @@ const Container = styled.View`
     background-color: ${({ theme }) => theme.background};
 `;
 
-const AppControll = ({ navigation }) => {
+const Invasion = ({ navigation }) => {
     return (
         <Container>
-            <Text style={{fontSize:24}}>가전 공간입니다</Text>
-            <Button title="Appliance" onPress={() => navigation.navigate('Appliance')} />
+            <Text style={{fontSize:24}}>침입 관리</Text>
         </Container>
     );
 };
 
-export default AppControll;
+export default Invasion;
