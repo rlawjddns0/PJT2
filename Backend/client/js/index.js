@@ -74,7 +74,7 @@ function btn_aircon_on() {
 
     let data = 3;
 
-    socket.emit('airconOnToServer', data);
+    socket.emit('appliancesChangeToServer', data);
 };
 function btn_aircon_off() {
 

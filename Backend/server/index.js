@@ -83,18 +83,18 @@ io.on('connection', socket => {
         socket.to(roomName).emit('sendSafetyStatus', message);
     });
 
-    socket.on('PatrolStatus', (message) => {
-        //패트롤 상태 앱으로 보내기
-        socket.to(roomName).emit('sendPatrolStatus', message);
-    });
+    // socket.on('PatrolStatus', (message) => {
+    //     //패트롤 상태 앱으로 보내기
+    //     socket.to(roomName).emit('sendPatrolStatus', message);
+    // });
 
-    socket.on('airconOnToServer',(message)=>{
-        socket.to(roomName).emit('sendAirConOn', "sdfsfd");
-    })
+    // socket.on('airconOnToServer',(message)=>{
+    //     socket.to(roomName).emit('sendAirConOn', "sdfsfd");
+    // })
 
     socket.on('PatrolOnToServer', (data) => {
         //security service on~~
-        socket.to(roomName).emit('patrolOn')
+        socket.to(roomName).emit('patrolOn',)
 
         //패트롤 작동한다고 다시 메시지 보내기~
         socket.to(roomName).emit('sendPatrolStatus', "시큐리티 서비스 작동");
@@ -130,7 +130,37 @@ io.on('connection', socket => {
 
     //가전제품 상태변화
     socket.on('appliancesChangeToServer',(data)=>{
-        socket.to(roomName).emit('appliancesChangeToServer',data)
+        socket.to(roomName).emit('appliancesChange',data)
+        //1
+        //odom.py
+        //load_map
+        //a_star
+        //a_star_local_path
+        //path_tracking(가전제품 위치)
+        //goal_change
+
+        const opt = {
+            shell: true,
+            cwd: '../ros2_smart_home/src/sub2'
+        }
+        const child = spawn('call C:/dev/ros2_eloquent/setup.bat && call C:/Users/multicampus/Desktop/Backend/S05P21B202/ros2_smart_home/install/local_setup.bat && cd ../../ros2_smart_home/src/final/launch && ros2 launch appliances_change_launch.py', opt)
+        child.stderr.on('data', function (data) {
+            console.error("STDERR:", data.toString());
+          });
+          child.stdout.on('data', function (data) {
+            console.log("STDOUT:", data.toString());
+          });
+          child.on('exit', function (exitCode) {
+            console.log("Child exited with code: " + exitCode);
+          });
+          console.log("실행~")
+
+
+
+
+
+
+
     })
 
  
@@ -278,7 +308,6 @@ io.on('connection', socket => {
 
         const opt = {
             shell: true,
-            
             cwd: 'C:/Users/multicampus/Desktop/pjt2/day20210906/S05P21B202/ros2_smart_home/src/sub2/sub2'
         }
         const child = spawn('call C:/dev/ros2_eloquent/setup.bat && call C:/Users/multicampus/Desktop/pjt2/day20210906/S05P21B202/ros2_smart_home/install/local_setup.bat && load_map.py', opt)
