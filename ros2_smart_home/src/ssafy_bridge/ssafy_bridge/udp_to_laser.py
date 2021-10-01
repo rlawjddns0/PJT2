@@ -13,8 +13,8 @@ from geometry_msgs.msg import Point32
 
 params_lidar = {
     "CHANNEL" : int(1),
-    "localIP": "127.0.0.1",
-    # "localIP": '172.26.8.18',
+    # "localIP": "127.0.0.1",
+    "localIP": '172.26.8.18',
     "localPort": 9094,
     "Block_SIZE": int(1206)
 }
