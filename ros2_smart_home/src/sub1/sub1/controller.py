@@ -52,6 +52,7 @@ class Controller(Node):
     def listener_callback(self, msg):
         self.is_turtlebot_status=True
         self.turtlebot_status_msg=msg
+        print(msg)
 
     def envir_callback(self, msg):
         self.is_envir_status=True
