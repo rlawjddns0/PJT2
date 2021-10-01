@@ -8,7 +8,7 @@ from nav_msgs.msg import Odometry
 from geometry_msgs.msg import Twist
 from ssafy_msgs.msg import HandControl
 
-dst_ip='127.0.0.1'
+dst_ip='110.35.50.132'
 # dst_ip='172.26.8.18'
 
 class ssafy_bridge(Node):

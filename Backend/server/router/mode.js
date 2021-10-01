@@ -76,7 +76,7 @@ router.delete('/delete/:no',function(req,res){
 router.get('/current_mode/:user_no',function(req,res){
     const no=req.params.user_no
     //먼저 사용자 user_no로 커런트 모드에서 가져옴
-    DB.query('select * from current_mode where user_no=?',[user_no],(err,data)=>{
+    DB.query('select * from current_mode where user_no=?',[no],(err,data)=>{
         if(err){
             console.log(err)
         
