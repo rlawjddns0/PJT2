@@ -143,7 +143,7 @@ io.on('connection', socket => {
             shell: true,
             cwd: '../ros2_smart_home/src/sub2'
         }
-        const child = spawn('source /opt/ros/foxy/seyup.bash && cd ~/jenkins_home/workspace/kjw/ros2_smart_home && . install/setup.bash && cd ../../ros2_smart_home/src/final/launch && ros2 launch appliances_change_launch.py', opt)
+        const child = spawn('source /opt/ros/foxy/setup.bash && cd ~/jenkins_home/workspace/kjw/ros2_smart_home && . install/setup.bash && cd ../../ros2_smart_home/src/final/launch && ros2 launch appliances_change_launch.py', opt)
         child.stderr.on('data', function (data) {
             console.error("STDERR:", data.toString());
           });
