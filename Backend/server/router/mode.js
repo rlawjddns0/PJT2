@@ -106,7 +106,7 @@ router.get('/current_mode/:user_no',function(req,res){
 
 router.get('/test/:index',function(req,res){
     const index=req.params.index
-
+    const sql="select * from appliances where index=?"
     DB.query(sql,[index],(err,data)=>{
         console.log(data);
         if(err){
