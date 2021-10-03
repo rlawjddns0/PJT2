@@ -72,7 +72,7 @@ function btn_aircon_on() {
 
     console.log('btn_aircon_on');
 
-    let data = 3;
+    let data = 3; // aircon on number
 
     socket.emit('appliancesChangeToServer', data);
 };

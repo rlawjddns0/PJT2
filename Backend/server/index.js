@@ -7,6 +7,7 @@ const express = require('express');
 const router=require('./router/index')
 const schedule=require('node-schedule')
 const {spawn}=require('child_process')
+
 // Websocket 서버 구동을 위한 서버 코드입니다.
 
 // 노드 로직 순서
@@ -112,48 +113,43 @@ io.on('connection', socket => {
     });
 
     socket.on('turnleftToServer', (data) => {
-        //터틀봇 왼쪽으로 회전~
+        //터틀봇 왼쪽으로 회전
         socket.to(roomName).emit('turnleft', data);
 
     });
 
     socket.on('gostraightToServer', (data) => {
-        //터틀봇 앞으로 전진~
+        //터틀봇 앞으로 전진
         socket.to(roomName).emit('gostraight', data);
     });
 
     socket.on('turnrightToServer', (data) => {
-        //터틀봇 오른쪽으로 회전~
+        //터틀봇 오른쪽으로 회전
         socket.to(roomName).emit('turnright', data);
     });
 
 
     //가전제품 상태변화
     socket.on('appliancesChangeToServer',(data)=>{
-        socket.to(roomName).emit('appliancesChange',data)
-        //1
-        //odom.py
-        //load_map
-        //a_star
-        //a_star_local_path
-        //path_tracking(가전제품 위치)
-        //goal_change
+        socket.to(roomName).emit('appliancesChange', data)
 
         const opt = {
             shell: true,
-            cwd: '../ros2_smart_home/src/sub2'
+            env: {
+                PATH: process.env.PATH
+            },
         }
-        const child = spawn('source /opt/ros/foxy/setup.bash && cd ~/jenkins_home/workspace/kjw/ros2_smart_home && . install/setup.bash && cd ../../ros2_smart_home/src/final/launch && ros2 launch appliances_change_launch.py', opt)
+        // const child = spawn('source /opt/ros/foxy/setup.bash && cd ~/jenkins_home/workspace/kjw/ros2_smart_home && . install/setup.bash && cd ../../ros2_smart_home/src/final/launch && ros2 launch appliances_change_launch.py', opt)
+        const child = spawn('call C:/dev/ros2_eloquent/setup.bat && call C:/Users/multicampus/Desktop/backend/S05P21B202/ros2_smart_home/install/local_setup.bat && \
+        cd C:/Users/multicampus/Desktop/backend/S05P21B202/ros2_smart_home/src/final/launch && \
+        ros2 launch appliances_change_launch.py', opt)
         child.stderr.on('data', function (data) {
             console.error("STDERR:", data.toString());
-          });
-          child.stdout.on('data', function (data) {
-            console.log("STDOUT:", data.toString());
-          });
-          child.on('exit', function (exitCode) {
-            console.log("Child exited with code: " + exitCode);
-          });
-          console.log("실행~")
+        });
+        child.stdout.on('data', function (data) {
+            console.log(data.toString());
+        });
+        console.log("실행~")
 
 
 
