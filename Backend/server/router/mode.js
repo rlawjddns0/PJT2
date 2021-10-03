@@ -89,7 +89,7 @@ router.get('/current_mode/:user_no',function(req,res){
         }
         else{
             const mode_no=data[0].mode_no
-            DB.query('select * from mode where mode_no=?',[mode_no],(err,data)=>{
+            DB.query('select * from mode where no=?',[mode_no],(err,data)=>{
                 if(err){
                     console.log(err)
                 }else{
