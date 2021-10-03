@@ -104,7 +104,7 @@ router.get('/current_mode/:user_no',function(req,res){
     })
 })
 
-router.get('/current_mode/:index',function(req,res){
+router.get('/test/:index',function(req,res){
     const index=req.params.index
 
     DB.query(sql,[index],(err,data)=>{
