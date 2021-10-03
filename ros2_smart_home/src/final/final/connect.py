@@ -34,7 +34,7 @@ def disconnect():
 
 
 # 로직 3. 서버 연결
-sio.connect('http://j5b202.p.ssafy.io:12001/')
+sio.connect('http://j5b202.p.ssafy.io:9999/')
 
 # 로직 4. 데이터 송신
 sio.emit('sendTime','TEST')

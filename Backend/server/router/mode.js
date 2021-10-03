@@ -80,7 +80,7 @@ router.get('/current_mode/:user_no',function(req,res){
         if(err){
             console.log(err)
         
-        }else if(data.mode_no==null){
+        }else if(data[0].mode_no==null){
             return res.status(200).json({
                 success:true,
                 msg:"현재 작동중인 모드가 없습니다.",
@@ -88,7 +88,7 @@ router.get('/current_mode/:user_no',function(req,res){
             })
         }
         else{
-            const mode_no=data.mode_no
+            const mode_no=data[0].mode_no
             DB.query('select * from mode where mode_no=?',[mode_no],(err,data)=>{
                 if(err){
                     console.log(err)
