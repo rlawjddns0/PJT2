@@ -96,7 +96,7 @@ router.get('/current_mode/:user_no',function(req,res){
                     return res.status(200).json({
                         success:true,
                         msg:"현재 작동하고 있는 모드",
-                        data,
+                        data:data,
                     })
                 }
             })
@@ -104,5 +104,20 @@ router.get('/current_mode/:user_no',function(req,res){
     })
 })
 
+router.get('/current_mode/:index',function(req,res){
+    const index=req.params.index
+
+    DB.query(sql,[index],(err,data)=>{
+        console.log(data);
+        if(err){
+            console.log(err)
+        }else{
+            return res.status(200).json({
+                success:true,
+                data:data,
+            })
+        }
+    })
+})
 
 module.exports=router;
