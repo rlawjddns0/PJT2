@@ -4,11 +4,11 @@ from geometry_msgs.msg import Pose,PoseStamped
 
 class goal_change(Node):
 
-    def __init__(self):
+    def __init__(self, des_x, des_y):
         super().__init__('goal_change')
         # 로직 1. publisher, subscriber 만들기
         time_period = 0.5
-        self.point = [184,224]
+        self.point = [des_x, des_y]
         self.map_resolution=0.05
         self.map_offset_x=-8-8.75
         self.map_offset_y=-4-8.75

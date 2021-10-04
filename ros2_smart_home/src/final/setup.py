@@ -21,13 +21,14 @@ setup(
     entry_points={
         'console_scripts': [
             'final = final.final:main',
-            'a_star = sub2.a_star:main',
-            'a_star_local_path = sub2.a_star_local_path:main',
+            'a_star = final.a_star:main',
+            'a_star_local_path = final.a_star_local_path:main',
             # 'ex_calib = sub2.ex_calib:main',
             # 'human_detector = sub2.human_detector:main',
-            'load_map = sub2.load_map:main',
-            'odom = sub2.odom:main',
-            'path_tracking = sub2.path_tracking:main',
+            'load_map = final.load_map:main',
+            'odom = final.odom:main',
+            'path_tracking = final.path_tracking:main',
+            'control_hub = final.control_hub:main'
             # 'seg_binarizer = sub2.seg_binarizer:main',
             # 'cleaning2 = sub2.cleaning2:main'
         ],

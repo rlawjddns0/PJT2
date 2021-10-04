@@ -72,7 +72,7 @@ function btn_aircon_on() {
 
     console.log('btn_aircon_on');
 
-    let data = 3; // aircon on number
+    let data = 4; // aircon on number
 
     socket.emit('appliancesChangeToServer', data);
 };
@@ -128,6 +128,65 @@ function modeOnToServer() {
 function cleaner_on() {
     console.log('Cleaner on!')
     socket.emit('cleanerOnToServer')
+}
+
+function map_on() {
+    console.log('map on!')
+    socket.emit('OnToServer')
+}
+function map_off() {
+    console.log('map off!')
+    socket.emit('mapOffToServer')
+}
+function aircon_On() {
+    console.log('aircon on!')
+    socket.emit('airconOnToServer')
+}
+function aircon_Off() {
+    console.log('aircon off!')
+    socket.emit('airconOffToServer')
+}
+function Light1_On() {
+    console.log('Light1 on!')
+    socket.emit('light1OnToServer')
+}
+function Light1_Off() {
+    console.log('Light1 off!')
+    socket.emit('light1OffToServer')
+}
+
+// 청소 관련 함수
+function cleaner_On() {
+    console.log('cleaner on!')
+    socket.emit('cleanerOnToServer')
+}
+function room1_cleaner_On() {
+    console.log('room1 cleaner on!')
+    socket.emit('room1CleanerOnToServer')
+}
+function room2_cleaner_On() {
+    console.log('room2 cleaner on!')
+    socket.emit('room2CleanerOnToServer')
+}
+function room3_cleaner_On() {
+    console.log('room3 cleaner on!')
+    socket.emit('room3CleanerOnToServer')
+}
+function room4_cleaner_On() {
+    console.log('room4 cleaner on!')
+    socket.emit('room4CleanerOnToServer')
+}
+function livingroom_cleaner_On() {
+    console.log('living room cleaner on!')
+    socket.emit('livingroomCleanerOnToServer')
+}
+function kitchen_cleaner_On() {
+    console.log('kitchen cleaner on!')
+    socket.emit('kitchenCleanerOnToServer')
+}
+function cleaner_Off() {
+    console.log('cleaner off!')
+    socket.emit('CleanerOffToServer')
 }
 
 

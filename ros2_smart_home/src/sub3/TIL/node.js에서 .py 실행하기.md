@@ -52,3 +52,32 @@ spawn의 첫 번째에 들어가는 값은 명령어로, shell을 true로 설정
 
 
 
+
+
+## 갑자기 안됨
+
+갑자기 실행이 안됨(코드 변화x)
+
+child_process에 대한 공식 문서를 확인해 본 결과 shell을 사용하는 경우 환경 변수가 다음과 같이 설정된다고 한다.
+
+- [`shell`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#String_type) Shell to execute the command with. See [Shell requirements](https://nodejs.org/api/child_process.html#child_process_shell_requirements) and [Default Windows shell](https://nodejs.org/api/child_process.html#child_process_default_windows_shell). **Default:** `'/bin/sh'` on Unix, `process.env.ComSpec` on Windows.
+
+shell을 사용하지 않을 때의 환경 변수는 env <Object> Environment key-value pairs. Default: process.env.
+
+라고 써있다..
+
+ 환경 변수를 다음과 같이 설정한 결과 실행은 되었으나 rqt나 rviz에 실행 결과가 반영되지 않는다.
+
+```js
+        const opt = {
+            cwd: '../ros2_smart_home/src/sub2',
+            shell: true,
+            env: {
+                PATH: process.env.PATH
+            },
+        }
+```
+
+
+
+잘 되던게 갑자기 실행이 안되는 원인은 환경 변수 때문이라고 쳐도 왜 실행을 했는데도 rviz나 rqt에 반영이 되지 않는걸까? 진짜 모르겠다.

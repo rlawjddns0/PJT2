@@ -1,7 +1,6 @@
 import rclpy
 import numpy as np
 from rclpy.node import Node
-
 import os
 from geometry_msgs.msg import Pose
 from squaternion import Quaternion
@@ -82,9 +81,14 @@ class loadMap(Node):
                 if grid[x][y] == 100:
                     # 로직 3. 점유영역 근처 필터처리
                     for i in range(y-5, y+5):
+                        if i >= 350: i = 349
+                        if i <= 0: i = 0
+                        
                         if grid[x][i] != 100:
                             grid[x][i] = 127
                         for j in range(x-5, x+5):
+                            if j >= 350: j = 349
+                            if j <= 0: j = 0
                             if grid[j][i] != 100:
                                 grid[j][i] = 127
 
@@ -102,6 +106,7 @@ class loadMap(Node):
     def timer_callback(self):
         self.map_msg.header.stamp =rclpy.clock.Clock().now().to_msg()
         self.map_pub.publish(self.map_msg)
+
 
        
 def main(args=None):

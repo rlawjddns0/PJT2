@@ -29,12 +29,6 @@ def generate_launch_description():
             node_executable='path_tracking',
             node_name='path_tracking'
         ),
-
-        # Node(
-        #     package='security_service',
-        #     node_executable='patrol_client',
-        #     node_name='patrol_client'
-        # )
     ])
 
 

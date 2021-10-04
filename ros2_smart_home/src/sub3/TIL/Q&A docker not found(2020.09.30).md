@@ -152,9 +152,7 @@
 
 
 
-*서버에서 직접 npm start 하면 에러는 뜨지 않으나 젠킨스 통해서 npm start 하면 아래 에러가 뜬다.
-
-![Image Pasted at 2021-9-30 02-29](C:\Users\multicampus\Desktop\Image Pasted at 2021-9-30 02-29.png)
+*서버에서 직접 npm start 하면 에러는 뜨지 않으나 젠킨스 통해서 npm start 하면 위 에러가 뜬다.
 
 
 

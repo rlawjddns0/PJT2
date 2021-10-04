@@ -47,7 +47,7 @@ class a_star(Node):
 
 
         # 로직 2. 파라미터 설정
-        self.goal = [184,224] 
+        self.goal = [0, 0] 
         self.map_size_x=350
         self.map_size_y=350
         self.map_resolution=0.05

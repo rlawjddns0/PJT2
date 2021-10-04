@@ -82,6 +82,9 @@ class followTheCarrot(Node):
         self.out_rad_vel = 0.0
 
         self.turn_cnt = 0
+        self.turn_right = 0
+        self.turn_flag = False
+        # 오른쪽쪽 회전 횟수
         self.go_cnt = 0
         self.back_cnt = 0
 
@@ -98,7 +101,7 @@ class followTheCarrot(Node):
         # 1. turtlebot이 연결되어 있고, odom이 작동하며, 경로가 있을 때,
         if self.is_status and self.is_odom and self.is_path:
             # 남은 경로가 1 이상이면
-            if len(self.path_msg.poses)> 1:
+            if len(self.path_msg.poses)> 3:
                 self.is_look_forward_point = False
                 
                 # 로봇의 현재 위치를 나타내는 변수
@@ -167,10 +170,10 @@ class followTheCarrot(Node):
                         # print("state1")
                         if 0.2 < abs(theta):
                             self.out_vel = 0.0
-                            self.out_rad_vel = theta * 0.35
+                            self.out_rad_vel = theta * 0.30
                         else:
-                            self.out_vel = 0.5
-                            self.out_rad_vel = theta * 0.35
+                            self.out_vel = 0.7
+                            self.out_rad_vel = theta * 0.30
                         
                     # 전방 충돌 상황
                     if self.state == 2:
@@ -190,7 +193,7 @@ class followTheCarrot(Node):
                             self.state = 8 # 회전 조건
 
                     # 오른쪽 방향으로 회전
-                    if self.state == 8 and self.turn_cnt > 0:
+                    if self.state == 8 and self.turn_cnt > 0 and self.turn_flag == False:
                         self.out_vel = 0.0
                         self.out_rad_vel = 20* pi / 180
                         self.turn_cnt -= 1
@@ -200,6 +203,22 @@ class followTheCarrot(Node):
                             self.state = 6 # 직진 조건
                             self.go_cnt = 30
                             self.out_rad_vel = 0.0
+                            self.turn_right += 1
+                            # 오른쪽으로 세 번 돌았으면 한 번은 왼쪽으로 돌게 만들어서 갇히는 경우 방지
+                            if self.turn_right == 3:
+                                self.turn_flag = True
+
+                    # 왼쪽 방향으로 회전
+                    if self.state == 8 and self.turn_cnt > 0 and self.turn_flag == True:
+                        self.out_vel = 0.0
+                        self.out_rad_vel = -20 * pi / 180
+                        self.turn_cnt -= 1
+                        if self.turn_cnt == 0:
+                            print("회전 종료")
+                            self.state = 6 # 직진 조건
+                            self.go_cnt = 30
+                            self.out_rad_vel = 0.0
+                            self.turn_flag = False
                     # 직진
                     if self.state == 6 and self.go_cnt > 0:
                         self.out_vel = 1.0
@@ -214,13 +233,21 @@ class followTheCarrot(Node):
                         self.out_rad_vel = 0.0
                         self.back_cnt -= 1
 
+                    # random move for robustness
+                    if random.randint(0, 31) > 29:
+                        self.out_vel = 0.5
+                        self.out_rad_vel = 0.3
+                    elif random.randint(0, 30) < 1:
+                        self.out_vel = -0.5
+                        self.out_rad_vel = -0.3
+
                     self.cmd_msg.linear.x = self.out_vel
                     self.cmd_msg.angular.z = self.out_rad_vel
                     self.cmd_pub.publish(self.cmd_msg)
                     # print("linear.x: ", self.out_vel)
                     # print("angular.z: ", self.out_rad_vel)
             # 목적지는 있는데 경로가 만들어지지 않는 경우(터틀봇이 잘못된 위치에 있음)
-            elif self.is_status and self.is_odom and self.is_goal and (self.goal != self.current_pos) and not self.path_exists:
+            elif self.is_status and self.is_odom and self.is_goal and abs(self.goal[0] - self.current_pos[0]) > 3 and abs(self.goal[1] - self.current_pos[1]) > 3 and not self.path_exists:
                 print("통과!")
                 # 목적지가 있으면 goal_pose 통신이 이루어진다.
                 # 전방, 후방 lidar distance 확인 후 더 먼 쪽으로 이동한다.
@@ -230,6 +257,15 @@ class followTheCarrot(Node):
                 else:
                     self.out_vel = -0.5
                     self.out_rad_vel = 0.1
+
+                # random move
+                if random.randint(0, 31) > 28:
+                    self.out_vel = 0.5
+                    self.out_rad_vel = 0.3
+                elif random.randint(0, 30) < 2:
+                    self.out_vel = -0.5
+                    self.out_rad_vel = -0.3
+
                 self.cmd_msg.linear.x = self.out_vel
                 self.cmd_msg.angular.z = self.out_rad_vel
                 self.cmd_pub.publish(self.cmd_msg)
@@ -241,39 +277,32 @@ class followTheCarrot(Node):
                 print("no found forward point")
                 self.is_stop = True
                 self.is_path = False
+                self.is_goal = False
                 self.cmd_msg.linear.x=0.0
                 self.cmd_msg.angular.z=0.0
-                self.cmd_pub.publish(self.cmd_msg)
-            if random.randint(0, 31) > 27:
-                self.out_vel = 0.5
-                self.out_rad_vel = 0.3
-                self.cmd_msg.linear.x = self.out_vel
-                self.cmd_msg.angular.z = self.out_rad_vel
-                self.cmd_pub.publish(self.cmd_msg)
-            elif random.randint(0, 30) < 3:
-                self.out_vel = -0.5
-                self.out_rad_vel = -0.3
-                self.cmd_msg.linear.x = self.out_vel
-                self.cmd_msg.angular.z = self.out_rad_vel
                 self.cmd_pub.publish(self.cmd_msg)
 
     def odom_callback(self, msg):
         self.is_odom=True
-        print("상태: ", self.state)
+        # print("상태: ", self.state)
         self.odom_msg=msg
         self.current_x, self.current_y = self.pose_to_grid_cell(self.odom_msg.pose.pose.position.x, self.odom_msg.pose.pose.position.y)
         self.current_pos = [self.current_x, self.current_y]
-        # print("self.state", self.state)
+        # print("현재 위치: ", self.odom_msg.pose.pose.position.x, self.odom_msg.pose.pose.position.y)
         # 정지 상태 - 초기값 설정
-        print(self.stop_cnt)
+        # print(self.stop_cnt)
+        # print("상태: ", self.state)
         if self.stop_cnt <= 0:
             self.turtle_pos_x = msg.pose.pose.position.x
             self.turtle_pos_y = msg.pose.pose.position.y
+            self.is_stop = False
             self.stop_cnt = 1
         # stop_cnt가 300 이상이면 완전 정지 상태로 판단
         elif self.stop_cnt > 300:
             self.is_stop = True
-            self.state = 2
+            # 전방 충돌과 후방 충돌 중 하나로 가정하고 움직이기(랜덤)
+            rand = random.randint(2, 3)
+            self.state = rand
             self.stop_cnt = 0
         else:
             # stop_cnt가 1에서 300 이하인 경우 현재 멈춰있는지 판단해야 함
@@ -284,7 +313,7 @@ class followTheCarrot(Node):
                 (self.turtle_pos_y-msg.pose.pose.position.y) ** 2)
                 # 거리 차이가 매우 작으면 현재 정지 상태로 판단
                 # print(distance)
-                if distance < 0.0001:
+                if distance < 0.001:
                     self.stop_cnt += 1 # 정지 상태가 일정 시간 지나면 탈출 로직 작동
                 else:
                     self.turtle_pos_x = msg.pose.pose.position.x
@@ -300,14 +329,15 @@ class followTheCarrot(Node):
         q = Quaternion(msg.pose.pose.orientation.w, msg.pose.pose.orientation.x, msg.pose.pose.orientation.y, msg.pose.pose.orientation.z)
         _, _, self.robot_yaw = q.to_euler()
 
-    
+    # local path
     def path_callback(self, msg):
         self.is_path=True
         self.path_msg=msg
-        if len(self.path_msg.poses) < 3:
+        if len(self.path_msg.poses) < 5:
             self.path_exists = False
         else:
             self.path_exists = True
+
 
 
     def status_callback(self,msg):
@@ -382,7 +412,7 @@ class followTheCarrot(Node):
             goal_x=msg.pose.position.x
             goal_y=msg.pose.position.y
             goal_cell=self.pose_to_grid_cell(goal_x,goal_y)
-            self.goal = [goal_cell[0], goal_cell[1]] 
+            self.goal = [goal_cell[0], goal_cell[1]]
             print("목표 지점: ", self.goal)
 
     # goal callback용

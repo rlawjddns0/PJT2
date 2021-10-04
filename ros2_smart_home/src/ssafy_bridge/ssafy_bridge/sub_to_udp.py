@@ -11,7 +11,8 @@ from ssafy_msgs.msg import HandControl
 # sub_to_udp의 역할: simulator에 구독한 값들(cmd_vel, hand_control, app_control)을 전달
 # sub_to_udp를 켜면 터틀봇을 조작하는 명령어를 사용할 수 있음.
 # 따라서 dst_ip는 시뮬레이터가 위치하는 ip여야 할 듯??
-dst_ip = '125.242.221.170' # 내 아이피
+# dst_ip = '125.242.221.170' # 내 아이피
+dst_ip = '127.0.0.1'
 # dst_ip='110.35.50.132'
 # dst_ip='172.26.8.18'
 

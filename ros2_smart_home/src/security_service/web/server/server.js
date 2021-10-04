@@ -1,4 +1,3 @@
-
 // Websocket 서버 구동을 위한 서버 코드입니다.
 
 // 노드 로직 순서
@@ -81,6 +80,7 @@ io.on('connection', socket => {
           child.on('exit', function (exitCode) {
             console.log("Child exited with code: " + exitCode);
           });
+          console.log("실행~")
         
         // socket.to(roomName).emit('cleanerOn'); // 일단 소켓에 cleanerOn을 보내긴 하는데 안쓸 수도?
     })

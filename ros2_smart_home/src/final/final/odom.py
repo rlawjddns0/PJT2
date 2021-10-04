@@ -21,12 +21,10 @@ import time
 # 4. 로봇 위치 추정
 # 5. 추정한 로봇 위치를 메시지에 담아 publish, broadcast
 
-
 class odom(Node):
 
     def __init__(self):
         super().__init__('odom')
-        
         # 로직 1. publisher, subscriber, broadcaster 만들기
         self.subscription = self.create_subscription(TurtlebotStatus,'/turtlebot_status',self.listener_callback,10)
         self.imu_sub = self.create_subscription(Imu,'/imu',self.imu_callback,10)
@@ -43,6 +41,7 @@ class odom(Node):
         self.is_status=False
         self.is_imu=False
         self.is_calc_theta=False
+        self.correction = 0
         # x,y,theta는 추정한 로봇의 위치를 저장할 변수 입니다.
         self.first_time = False
         self.x = 0 # 로봇의 초기 위치
@@ -92,50 +91,57 @@ class odom(Node):
                 self.is_status=True
                 self.prev_time=rclpy.clock.Clock().now()
             else:
-                self.current_time=rclpy.clock.Clock().now()
-                # 계산 주기를 저장한 변수 입니다. 단위는 초(s)
-                self.period=(self.current_time-self.prev_time).nanoseconds/1000000000
-                # 로봇의 선속도, 각속도를 저장하는 변수, 시뮬레이터에서 주는 각 속도는 방향이 반대이므로 (-)를 붙여줍니다.
-                linear_x=msg.twist.linear.x
-                angular_z=-msg.twist.angular.z
-                '''
-                로직 4. 로봇 위치 추정
-                (테스트) linear_x = 1, self.theta = 1.5707(rad), self.period = 1 일 때
-                self.x=0, self.y=1 이 나와야 합니다. 로봇의 헤딩이 90도 돌아가 있는
-                상태에서 선속도를 가진다는 것은 x축방향이 아니라 y축방향으로 이동한다는 뜻입니다.
-                '''
+                self.correction += 1
+                # 충전 장소와 통신하여 정확한 현재 위치를 파악하는 컨셉
+                if self.correction == 3000:
+                    self.x = msg.twist.angular.x
+                    self.y = msg.twist.angular.y
+                    self.theta = msg.twist.linear.z * pi/180
+                else:
+                    self.current_time=rclpy.clock.Clock().now()
+                    # 계산 주기를 저장한 변수 입니다. 단위는 초(s)
+                    self.period=(self.current_time-self.prev_time).nanoseconds/1000000000
+                    # 로봇의 선속도, 각속도를 저장하는 변수, 시뮬레이터에서 주는 각 속도는 방향이 반대이므로 (-)를 붙여줍니다.
+                    linear_x=msg.twist.linear.x
+                    angular_z=-msg.twist.angular.z
+                    '''
+                    로직 4. 로봇 위치 추정
+                    (테스트) linear_x = 1, self.theta = 1.5707(rad), self.period = 1 일 때
+                    self.x=0, self.y=1 이 나와야 합니다. 로봇의 헤딩이 90도 돌아가 있는
+                    상태에서 선속도를 가진다는 것은 x축방향이 아니라 y축방향으로 이동한다는 뜻입니다.
+                    '''
 
-                self.x += linear_x * cos(self.theta) * self.period
-                self.y += linear_x * sin(self.theta) * self.period
-                # self.theta += angular_z * self.period
+                    self.x += linear_x * cos(self.theta) * self.period
+                    self.y += linear_x * sin(self.theta) * self.period
+                    # self.theta += angular_z * self.period
 
-                self.base_link_transform.header.stamp =rclpy.clock.Clock().now().to_msg()
-                self.laser_transform.header.stamp =rclpy.clock.Clock().now().to_msg()
-                
-                # 로직 5. 추정한 로봇 위치를 메시지에 담아 publish, broadcast
+                    self.base_link_transform.header.stamp =rclpy.clock.Clock().now().to_msg()
+                    self.laser_transform.header.stamp =rclpy.clock.Clock().now().to_msg()
+                    
+                    # 로직 5. 추정한 로봇 위치를 메시지에 담아 publish, broadcast
 
-                q = Quaternion.from_euler(0, 0, self.theta)
-                
-                self.base_link_transform.transform.translation.x = self.x
-                self.base_link_transform.transform.translation.y = self.y
-                self.base_link_transform.transform.rotation.x = q.x
-                self.base_link_transform.transform.rotation.y = q.y
-                self.base_link_transform.transform.rotation.z = q.z
-                self.base_link_transform.transform.rotation.w = q.w
-                
-                self.odom_msg.pose.pose.position.x = self.x
-                self.odom_msg.pose.pose.position.y = self.y
-                self.odom_msg.pose.pose.orientation.x = q.x
-                self.odom_msg.pose.pose.orientation.y = q.y
-                self.odom_msg.pose.pose.orientation.z = q.z
-                self.odom_msg.pose.pose.orientation.w = q.w
-                self.odom_msg.twist.twist.linear.x = linear_x
-                self.odom_msg.twist.twist.angular.z = angular_z
+                    q = Quaternion.from_euler(0, 0, self.theta)
+                    
+                    self.base_link_transform.transform.translation.x = self.x
+                    self.base_link_transform.transform.translation.y = self.y
+                    self.base_link_transform.transform.rotation.x = q.x
+                    self.base_link_transform.transform.rotation.y = q.y
+                    self.base_link_transform.transform.rotation.z = q.z
+                    self.base_link_transform.transform.rotation.w = q.w
+                    
+                    self.odom_msg.pose.pose.position.x = self.x
+                    self.odom_msg.pose.pose.position.y = self.y
+                    self.odom_msg.pose.pose.orientation.x = q.x
+                    self.odom_msg.pose.pose.orientation.y = q.y
+                    self.odom_msg.pose.pose.orientation.z = q.z
+                    self.odom_msg.pose.pose.orientation.w = q.w
+                    self.odom_msg.twist.twist.linear.x = linear_x
+                    self.odom_msg.twist.twist.angular.z = angular_z
 
-                self.broadcaster.sendTransform(self.base_link_transform)
-                self.broadcaster.sendTransform(self.laser_transform)
-                self.odom_publisher.publish(self.odom_msg)
-                self.prev_time=self.current_time
+                    self.broadcaster.sendTransform(self.base_link_transform)
+                    self.broadcaster.sendTransform(self.laser_transform)
+                    self.odom_publisher.publish(self.odom_msg)
+                    self.prev_time=self.current_time
 
         
 def main(args=None):
