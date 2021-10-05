@@ -125,10 +125,6 @@ function modeOnToServer() {
 
     socket.emit('modeOnToServer', data);
 };
-function cleaner_on() {
-    console.log('Cleaner on!')
-    socket.emit('cleanerOnToServer')
-}
 
 function map_on() {
     console.log('map on!')
@@ -138,13 +134,13 @@ function map_off() {
     console.log('map off!')
     socket.emit('mapOffToServer')
 }
-function aircon_On() {
+function livingroomaircon_On() {
     console.log('aircon on!')
-    socket.emit('airconOnToServer')
+    socket.emit('livingroomairOnToServer')
 }
-function aircon_Off() {
+function livingroomaircon_Off() {
     console.log('aircon off!')
-    socket.emit('airconOffToServer')
+    socket.emit('livingroomairOffToServer')
 }
 function Light1_On() {
     console.log('Light1 on!')
