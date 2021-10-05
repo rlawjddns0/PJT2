@@ -858,60 +858,60 @@ io.on('connection', socket => {
     });
 
 
-    //가전제품 상태변화
-    socket.on('appliancesChangeToServer',(data)=>{
-        socket.to(roomName).emit('appliancesChange',data)
-        //1
-        //odom.py
-        //load_map
-        //a_star
-        //a_star_local_path
-        //path_tracking(가전제품 위치)
-        //goal_change
+    // //가전제품 상태변화
+    // socket.on('appliancesChangeToServer',(data)=>{
+    //     socket.to(roomName).emit('appliancesChange',data)
+    //     //1
+    //     //odom.py
+    //     //load_map
+    //     //a_star
+    //     //a_star_local_path
+    //     //path_tracking(가전제품 위치)
+    //     //goal_change
     
         
-        const idx=data.index
-        const sql="select * from appliances where idx=?"
+    //     const idx=data.index
+    //     const sql="select * from appliances where idx=?"
 
-        //현재 들어온 가전제품 정보(index, y좌표, x좌표, 현 상태값)
-        const result
-        DB.query(sql,[idx],(err,data)=>{
-            console.log(data)
-            if(err){
-                console.log(err)
-            }else{
-                if(data[0].state==1)data[0]=2
-                else data[0]=1
-                result=data
-            }
-        })
-
-
+    //     //현재 들어온 가전제품 정보(index, y좌표, x좌표, 현 상태값)
+    //     const result
+    //     DB.query(sql,[idx],(err,data)=>{
+    //         console.log(data)
+    //         if(err){
+    //             console.log(err)
+    //         }else{
+    //             if(data[0].state==1)data[0]=2
+    //             else data[0]=1
+    //             result=data
+    //         }
+    //     })
 
 
-        const opt = {
-            shell: true,
-            cwd: '../ros2_smart_home/src/sub2'
-        }
-        const child = spawn('source /opt/ros/foxy/setup.bash && cd ~/jenkins_home/workspace/kjw/ros2_smart_home && . install/setup.bash && cd ../../ros2_smart_home/src/final/launch && ros2 launch appliances_change_launch.py && ros2 run final appliance_control.py'+result[0].x+' '+result[0].y+' '+result[0].idx+' '+result[0].state, opt)
-        child.stderr.on('data', function (data) {
-            console.error("STDERR:", data.toString());
-          });
-          child.stdout.on('data', function (data) {
-            console.log("STDOUT:", data.toString());
-          });
-          child.on('exit', function (exitCode) {
-            console.log("Child exited with code: " + exitCode);
-          });
-          console.log("실행~")
 
 
+    //     const opt = {
+    //         shell: true,
+    //         cwd: '../ros2_smart_home/src/sub2'
+    //     }
+    //     const child = spawn('source /opt/ros/foxy/setup.bash && cd ~/jenkins_home/workspace/kjw/ros2_smart_home && . install/setup.bash && cd ../../ros2_smart_home/src/final/launch && ros2 launch appliances_change_launch.py && ros2 run final appliance_control.py'+result[0].x+' '+result[0].y+' '+result[0].idx+' '+result[0].state, opt)
+    //     child.stderr.on('data', function (data) {
+    //         console.error("STDERR:", data.toString());
+    //       });
+    //       child.stdout.on('data', function (data) {
+    //         console.log("STDOUT:", data.toString());
+    //       });
+    //       child.on('exit', function (exitCode) {
+    //         console.log("Child exited with code: " + exitCode);
+    //       });
+    //       console.log("실행~")
 
 
 
 
 
-    })
+
+
+    // })
 
  
 
