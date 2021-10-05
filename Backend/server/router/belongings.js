@@ -31,7 +31,7 @@ router.get('/list/:user_no',function(req,res){
         return res.status(200).json({
             success:true,
             msg:"현재 분실물 리스트 정보",
-            data
+            data:data
         })
     })
 })

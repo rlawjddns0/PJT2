@@ -185,13 +185,6 @@ io.on('connection', socket => {
         socket.to(roomName).emit('turnright', data);
     });
 
-
-    //가전제품 상태변화
-    socket.on('appliancesChangeToServer',(data)=>{
-        // data = 4
-        socket.to(roomName).emit('appliancesChange', data)
-    })
-
     //터틀봇에서 소지품 찾았다고 연락이 온다~
     socket.on('findBelongingsToServer',(data)=>{
         
