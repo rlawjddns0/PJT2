@@ -156,6 +156,8 @@ def img_callback(msg):
 
 def scan_callback(msg):
 
+    print("스캔콜백햇어?")
+
     global xyz
 
     R = np.array(msg.ranges)
@@ -186,14 +188,24 @@ def main(args=None):
 
     # CWD_PATH = os.getcwd()
     
-    MODEL_NAME = 'ssd_mobilenet_v1_coco_2018_01_28'
+    # MODEL_NAME = 'ssd_mobilenet_v1_coco_2018_01_28'
+
+    # PATH_TO_WEIGHT = os.path.join('C:\\Users\\multicampus\\Desktop\\S05P21B202\\ros2_smart_home\\src\\sub3\\sub3', 'model_weights', \
+    #     MODEL_NAME, 'frozen_inference_graph.pb')
+
+    # print('PATH_TO_WEIGHT : ' + PATH_TO_WEIGHT)
+    # PATH_TO_LABELS = os.path.join('C:\\Users\\multicampus\\Desktop\\S05P21B202\\ros2_smart_home\\src\\sub3\\sub3', 'model_weights', \
+    #     'data', 'mscoco_label_map.pbtxt')
+    # print('PATH_TO_LABELS : ' + PATH_TO_LABELS)
+
+    MODEL_NAME = 'new object detector'
 
     PATH_TO_WEIGHT = os.path.join('C:\\Users\\multicampus\\Desktop\\S05P21B202\\ros2_smart_home\\src\\sub3\\sub3', 'model_weights', \
         MODEL_NAME, 'frozen_inference_graph.pb')
 
     print('PATH_TO_WEIGHT : ' + PATH_TO_WEIGHT)
     PATH_TO_LABELS = os.path.join('C:\\Users\\multicampus\\Desktop\\S05P21B202\\ros2_smart_home\\src\\sub3\\sub3', 'model_weights', \
-        'data', 'mscoco_label_map.pbtxt')
+        'data', 'labelmap.pbtxt')
     print('PATH_TO_LABELS : ' + PATH_TO_LABELS)
 
     NUM_CLASSES = 90
@@ -255,9 +267,8 @@ def main(args=None):
 
     subscription_scan = g_node.create_subscription(LaserScan, '/scan', scan_callback, 3)
 
-    # subscription_scan
-
-    # subscription_img
+    subscription_scan
+    subscription_img
     
     # 로직 8. lidar2img 좌표 변환 클래스 정의
     # sub2의 좌표 변환 클래스를 가져와서 정의. sub2.ex_calib에서 다 가져왔음
