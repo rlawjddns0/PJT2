@@ -83,6 +83,37 @@ io.on('connection', socket => {
         data = [70, 153, 1, 2]
         socket.to(roomName).emit('applianceControl', data);
     })
+    // 방2 전등 ON
+    //방2 전등 OFF
+    //방3 전등 ON
+    //방3 전등 OFF
+    //방4 전등 ON
+    //방4 전등 OFF
+    //주방 조명 ON
+    //주방 조명 OFF
+    //거실 조명 ON
+    //거실 조명 OFF
+    //방1 에어컨 ON
+    //방1 에어컨 OFF
+    //방2 에어컨 ON
+    //방2 에어컨 OFF
+    //방3 에어컨 ON
+    //방3 에어컨 OFF
+    //거실 에어컨 ON
+    //거실 에어컨 OFF
+    //공기 청정기 ON
+    //공기 청정기 OFF
+    //TV ON
+    //TV OFF
+    //방1 커튼 ON
+    //방1 커튼 OFF
+    //방2 커튼 ON
+    //방2 커튼 OFF
+    //방3 커튼 ON
+    //방3 커튼 OFF
+    //거실 커튼 ON
+    //거실 커튼 OFF
+
 
 
     // 청소 관련
@@ -227,14 +258,14 @@ io.on('connection', socket => {
     })
     //모드가 시작된다고 온다.~
     socket.on('modeOnToServer',(data)=>{
-        
+        console.log(data)
         //어떤 모드인지 앱에서 온 데이터를 가지고 뽑아내기
-        const no=data.no
+        const mode_no=data.mode_no
         const user_no=data.user_no
         
 
         //현재 실행상태 모드 수정
-        DB.query('update current_mode set mode_no=? where user_no=?',[mode,no],(err,data)=>{
+        DB.query('update current_mode set mode_no=? where user_no=?',[mode_no,user_no],(err,data)=>{
             if(err){
                 console.log(err)
             }
@@ -243,10 +274,10 @@ io.on('connection', socket => {
 
         //모드 번호로 저장된 모드 정보 가져오기
         const sql='select * from mode where no=?'
-        DB.query(sql,[mode],(err,data)=>{
+        DB.query(sql,[mode_no],(err,data)=>{
             if(err){
                 console.log(err)
-            }else{
+            }else if(data.length!=0){
                 var time=data[0].time
                 var day=data[0].day
                 var startH=0
@@ -288,6 +319,8 @@ io.on('connection', socket => {
                     socket.to(roomName).emit('modeStop',data[0].iot)
                 });
 
+            }else{
+                console.log("저장된 모드 없음")
             }
         })
 

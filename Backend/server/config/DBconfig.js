@@ -2,7 +2,7 @@ const mysql = require('mysql');
 var DB = mysql.createConnection({
     host     : 'localhost',
     user     : 'root',
-    password : 'Snekers11!',
+    password : 'root',
     database : 'ssafy_app_db'
 });
 
