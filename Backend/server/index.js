@@ -65,8 +65,8 @@ io.on('connection', socket => {
 
     // 에어컨 켜기
     socket.on('livingroomairOnToServer', (data)=>{
-        const sql="select * from appliances where idx=0"
-        console(data)
+        const sql="select * from appliances where idx=10"
+        console.log(data)
         DB.query(sql,(err,data)=>{
             if(err){
                 console.log(err)
