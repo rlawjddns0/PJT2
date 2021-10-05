@@ -121,7 +121,7 @@ function modeOnToServer() {
 
     console.log('modeOnToServer');
 
-    let data = '08162200';
+    let data = {'mode_no':'1','user_no':'1'}
 
     socket.emit('modeOnToServer', data);
 };
