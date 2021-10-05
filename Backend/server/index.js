@@ -64,17 +64,18 @@ io.on('connection', socket => {
     socket.join(roomName);
 
     // 에어컨 켜기
-    socket.on('livingroomairOnToServer', ()=>{
-        data = [192, 225, 10, 1]
+    socket.on('livingroomairOnToServer', (data)=>{
         const sql="select * from appliances where idx=0"
+        console(data)
         DB.query(sql,(err,data)=>{
             if(err){
                 console.log(err)
             }else{
-                ocket.to(roomName).emit('applianceControl', data);
+                console.log(data)
+                socket.to(roomName).emit('applianceControl', data);
             }
         })
-        s
+        
     })
     // 에어컨 끄기
     socket.on('livingroomairOffToServer', ()=>{
@@ -103,7 +104,7 @@ io.on('connection', socket => {
     socket.on('livingroomOnToServer', (data)=>{
         console.log(data)
         data = [70, 153, 1, 2]
-        socket.to(roomName).emit('applianceControl', data);
+        socket.to(roomName).emit('sendPatrolStatus', data);
     })
     //거실 조명 OFF
     //방1 에어컨 ON
