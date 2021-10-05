@@ -65,13 +65,14 @@ io.on('connection', socket => {
 
     // 에어컨 켜기
     socket.on('livingroomairOnToServer', (data)=>{
-        const sql="select * from appliances where idx=10"
+        const sql="select * from appliances where index=10"
         console.log(data)
         DB.query(sql,(err,data)=>{
             if(err){
                 console.log(err)
             }else{
-                console.log(data)
+                if(data.state==1)data.state=2
+                else data.state=1
                 socket.to(roomName).emit('applianceControl', data);
             }
         })
