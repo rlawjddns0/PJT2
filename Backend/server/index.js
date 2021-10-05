@@ -64,12 +64,12 @@ io.on('connection', socket => {
     socket.join(roomName);
 
     // 에어컨 켜기
-    socket.on('airconOnToServer', ()=>{
+    socket.on('livingroomairOnToServer', ()=>{
         data = [192, 225, 10, 1]
         socket.to(roomName).emit('applianceControl', data);
     })
     // 에어컨 끄기
-    socket.on('airconOffToServer', ()=>{
+    socket.on('livingroomairOffToServer', ()=>{
         data = [192, 225, 10, 2]
         socket.to(roomName).emit('applianceControl', data);
     })
