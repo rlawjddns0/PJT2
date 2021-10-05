@@ -138,6 +138,24 @@ io.on('connection', socket => {
         //a_star_local_path
         //path_tracking(가전제품 위치)
         //goal_change
+    
+        
+        const idx=data.index
+        const sql="select * from appliances where idx=?"
+
+        //현재 들어온 가전제품 정보(index, y좌표, x좌표, 현 상태값)
+        const result
+        DB.query(sql,[idx],(err,data)=>{
+            console.log(data)
+            if(err){
+                console.log(err)
+            }else{
+                result=data
+            }
+        })
+
+
+
 
         const opt = {
             shell: true,

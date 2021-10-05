@@ -104,20 +104,20 @@ router.get('/current_mode/:user_no',function(req,res){
     })
 })
 
-router.get('/test/:index',function(req,res){
-    const idx=req.params.index
-    const sql="select * from appliances where idx=?"
-    DB.query(sql,[idx],(err,data)=>{
-        console.log(data);
-        if(err){
-            console.log(err)
-        }else{
-            return res.status(200).json({
-                success:true,
-                data:data,
-            })
-        }
-    })
-})
+// router.get('/test/:index',function(req,res){
+//     const idx=req.params.index
+//     const sql="select * from appliances where idx=?"
+//     DB.query(sql,[idx],(err,data)=>{
+//         console.log(data);
+//         if(err){
+//             console.log(err)
+//         }else{
+//             return res.status(200).json({
+//                 success:true,
+//                 data:data,
+//             })
+//         }
+//     })
+// })
 
 module.exports=router;
