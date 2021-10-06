@@ -27,7 +27,14 @@ def disconnect():
 @sio.on('cleanerControl')
 def turn_on_cleaner(data):
     global m_control_cmd, x_min, x_max, y_min, y_max
-    m_control_cmd, x_min, x_max, y_min, y_max = data[0], data[1], data[2], data[3], data[4]
+    print(data)
+    m_control_cmd = data[0]["no"]
+    x_min = data[0]["x1"]
+    x_max = data[0]["x2"]
+    y_min = data[0]["y1"]
+    y_max = data[0]["y2"]
+    print("2: ", m_control_cmd, x_min, x_max, y_min, y_max)
+    # m_control_cmd, x_min, x_max, y_min, y_max = data[0], data[1], data[2], data[3], data[4]
 
 def get_global_var():
     return m_control_cmd, x_min, x_max, y_min, y_max
@@ -40,7 +47,7 @@ def reset_global_var():
 class cleaning(Node):
     def __init__(self):
         super().__init__('cleaning')
-        sio.connect('http://127.0.0.1:12001/')
+        sio.connect('http://j5b202.p.ssafy.io:12001/')
         self.goal_pub = self.create_publisher(PoseStamped, 'goal_pose', 10)
         # 맵 받아오기(이동 가능한 영역인지 확인하기 위함)
         self.map_msg=OccupancyGrid()
@@ -211,6 +218,7 @@ class cleaning(Node):
                 self.collision_backward = False
 
     def timer_callback(self):
+        global m_control_cmd
         ctrl_cmd, x_min, x_max, y_min, y_max = get_global_var()
         if self.ctrl_cmd != ctrl_cmd: # 입력이 달라지면 즉시 반영해야 함
             self.is_grid_update = False
@@ -224,6 +232,7 @@ class cleaning(Node):
                 if self.is_grid_update == False:
                     # grid 맵 가져오기
                     self.grid_update()
+                    self.alt = 0
                     print("map 가져오기 완료")
                     flag = False
                     for i in range(self.x_min, self.x_max):
@@ -257,18 +266,23 @@ class cleaning(Node):
                         print("이동!")
                         self.goal_pub.publish(goal)
                         print("3초 딜레이")
-                        time.sleep(3)
+                        time.sleep(1)
                     else:
                         print(self.point[0], self.point[1])
                         print("이동 가능한 위치가 아닙니다.")
                     # 다음 입력할 위치 선정
-                    self.j += 7
+                    self.j += 10
                     if self.j >= self.y_max: # j를 다 해봤으면
                         # i 변경
-                        self.i += 7
+                        self.i += 10
                         self.j = self.y_min
                     if self.i >= self.x_max:
                         print("모두 청소 완료!")
+                        if self.alt == 0:
+                            sio.emit("alertToServer", "청소 끝!")
+                            print("송신 완료!")
+                            self.alt = 1
+                            m_control_cmd = 0
         # 청소 모드가 아닐 때
         else:
             # 기본 위치(충전 장소)

@@ -6,14 +6,28 @@ import os
 from rclpy.node import Node
 import time
 from sensor_msgs.msg import CompressedImage, LaserScan
+from nav_msgs.msg import Odometry
 from ssafy_msgs.msg import BBox
-from ssafy_msgs.msg import ObjectXY
+import datetime
 import tensorflow as tf
+import base64
 
 from sub2.ex_calib import *
 
 from object_detection.utils import label_map_util
 from object_detection.utils import visualization_utils as vis_util
+
+import socketio
+sio = socketio.Client()
+
+@sio.event
+def connect():
+    print('connection established')
+
+@sio.event
+def disconnect():
+    print('disconnected from server')
+
 
 # 설치한 tensorflow를 tf 로 import 하고,
 # object_detection api 내의 utils인 vis_util과 label_map_util도 import해서
@@ -76,9 +90,7 @@ params_cam = {
 
 class detection_net_class():
     def __init__(self, sess, graph, category_index):
-        # super().__init__('detection_net_class')
-        # self.publisher = self.create_publisher(ObjectXY, 'object_xy', 10)
-
+        
         # 로직 6. object detector 클래스 생성
         # 스켈레톤 코드 내에 작성되어 있는 class인  detection_net_class()는 
         # graph와 라벨정보를 받아서 ROS2 topic 통신으로 들어온 이미지를 inference 하고
@@ -89,7 +101,10 @@ class detection_net_class():
         self.sess = sess
         self.detection_graph = graph
         self.category_index = category_index
+        # print(self.category_index)
 
+        sio.connect('http://j5b202.p.ssafy.io:12001/')
+        
         #init tensor
         self.image_tensor = self.detection_graph.get_tensor_by_name('image_tensor:0')
         self.boxes = self.detection_graph.get_tensor_by_name('detection_boxes:0')
@@ -98,7 +113,8 @@ class detection_net_class():
         self.num_detections = \
              self.detection_graph.get_tensor_by_name('num_detections:0')
 
-    def inference(self, image_np):
+
+    def inference(self, image_np, category_index):
         image_np_expanded = np.expand_dims(image_np, axis=0)
         
         t_start = time.time()
@@ -116,15 +132,21 @@ class detection_net_class():
 
         classes_pick = classes[:, idx_detect]
 
-        vis_util.visualize_boxes_and_labels_on_image_array(image_process,
-                np.squeeze(boxes),
-                np.squeeze(classes).astype(np.int32),
-                np.squeeze(scores),
-                self.category_index,
-                use_normalized_coordinates=True,
-                min_score_thresh=0.5,
-                line_thickness=8)
-                
+        global cname
+        global cnum
+        # global oflag
+        # global oindex
+        # oflag = [False]*4
+
+        _, cname, cnum = vis_util.visualize_boxes_and_labels_on_image_array(
+                        image_process,
+                        np.squeeze(boxes),
+                        np.squeeze(classes).astype(np.int32),
+                        np.squeeze(scores),
+                        category_index,
+                        use_normalized_coordinates=True,
+                        min_score_thresh=0.5,
+                        line_thickness=8)
         infer_time = time.time()-t_start
 
         return image_process, infer_time, boxes_detect, scores, classes_pick
@@ -156,8 +178,6 @@ def img_callback(msg):
 
 def scan_callback(msg):
 
-    print("스캔콜백햇어?")
-
     global xyz
 
     R = np.array(msg.ranges)
@@ -171,7 +191,19 @@ def scan_callback(msg):
         y.reshape([-1, 1]),
         z.reshape([-1, 1])
     ], axis=1)
-   
+    is_scan = True
+
+def odom_callback(msg):
+    global is_odom
+    global odom_msg
+    
+    is_odom=True
+    odom_msg=msg
+
+    # print("odoms: ")
+    # print(odom_msg)
+    global odoms
+    odoms = [odom_msg.pose.pose.position.x, odom_msg.pose.pose.position.y]   
 
 def main(args=None):
     # 로직 2. pretrained file and label map load    
@@ -200,15 +232,15 @@ def main(args=None):
 
     MODEL_NAME = 'new object detector'
 
-    PATH_TO_WEIGHT = os.path.join('C:\\Users\\multicampus\\Desktop\\S05P21B202\\ros2_smart_home\\src\\sub3\\sub3', 'model_weights', \
+    PATH_TO_WEIGHT = os.path.join('C:\\Users\\multicampus\\Desktop\\backend\\S05P21B202\\ros2_smart_home\\src\\sub3\\sub3', 'model_weights', \
         MODEL_NAME, 'frozen_inference_graph.pb')
 
     print('PATH_TO_WEIGHT : ' + PATH_TO_WEIGHT)
-    PATH_TO_LABELS = os.path.join('C:\\Users\\multicampus\\Desktop\\S05P21B202\\ros2_smart_home\\src\\sub3\\sub3', 'model_weights', \
+    PATH_TO_LABELS = os.path.join('C:\\Users\\multicampus\\Desktop\\backend\\S05P21B202\\ros2_smart_home\\src\\sub3\\sub3', 'model_weights', \
         'data', 'labelmap.pbtxt')
     print('PATH_TO_LABELS : ' + PATH_TO_LABELS)
 
-    NUM_CLASSES = 90
+    NUM_CLASSES = 11
 
     # print("logic1")
     # Loading label map
@@ -218,6 +250,7 @@ def main(args=None):
                                                             use_display_name=True)
     
     category_index = label_map_util.create_category_index(categories)
+    # print(category_index)
 
     # 로직 3. detection model graph 생성
     # tf.Graph()를 하나 생성하고, 이전에 불러들인 pretrained file 안의 뉴럴넷 파라메터들을
@@ -258,6 +291,7 @@ def main(args=None):
     # inference를 하기 위함입니다    
 
     global g_node
+    global origin_img
 
     rclpy.init(args=args)
 
@@ -267,9 +301,15 @@ def main(args=None):
 
     subscription_scan = g_node.create_subscription(LaserScan, '/scan', scan_callback, 3)
 
+    subscription_odom = g_node.create_subscription(Odometry,'/odom', odom_callback, 10)
+
+    subscription_odom
     subscription_scan
     subscription_img
     
+
+    oflag = [False]*5
+    olist = ['bag', 'key', 'wallet', 'remote controller', 'intruder']
     # 로직 8. lidar2img 좌표 변환 클래스 정의
     # sub2의 좌표 변환 클래스를 가져와서 정의. sub2.ex_calib에서 다 가져왔음
 
@@ -287,7 +327,7 @@ def main(args=None):
             rclpy.spin_once(g_node)
 
         # 로직 10. object detection model inference
-        image_process, infer_time, boxes_detect, scores, classes_pick = ssd_net.inference(img_bgr)
+        image_process, infer_time, boxes_detect, scores, classes_pick = ssd_net.inference(img_bgr, category_index)
 
         # 로직 11. 라이다-카메라 좌표 변환 및 정사영
         # sub2 에서 ex_calib 에 했던 대로 라이다 포인트들을
@@ -359,16 +399,34 @@ def main(args=None):
 
                 for _ in ostate_list:
                     distance = math.sqrt(math.pow(ostate_list[0][0],2)+math.pow(ostate_list[0][1],2))
-                    
-                    # object 위치 정보 보내기
-                    #
-                    #
-
                     cv2.putText(image_process,str(distance),(30,200), cv2.FONT_HERSHEY_SIMPLEX, 1,(255,255,255), 2, 0)
+                    if len(cname)>0 and (cname in olist) and cnum>=60 :
+                        if 0 <= olist.index(cname) < 4 and not oflag[olist.index(cname)]:
+                            oflag[olist.index(cname)] = True
+                            print(oflag)
+                            oindex = [ostate_list[0][0]+odoms[0], ostate_list[0][1]+odoms[1]]
+                            print(oindex)
+                            
+                            b64data = base64.b64encode(origin_img)
+                            data = {
+                                "type": olist.index(cname),
+                                "user_no": 1,
+                                "photo": b64data.decode('utf-8'),
+                                "datetime": str(datetime.datetime.now()),
+                                "position": str(oindex[0]) + ',' + str(oindex[1])
+                            }
+                            try:
+                                print("데이터 보냄")
+                                # print("encode: ", b64data)
+                                # print("decode: ", b64data.decode('utf-8'))
+                                sio.emit("findBelongingsToServer", data)
+                            except:
+                                print("오류")
+                            # cv2.imwrite("C:/Users/multicampus/Videos/Captures/detected/"+cname+".png", image_process)
+                
             image_process = draw_pts_img(image_process, xy_i[:, 0].astype(np.int32),
                                             xy_i[:, 1].astype(np.int32))
 
-            print(ostate_list)
 
         visualize_images(image_process, infer_time)
 
@@ -378,5 +436,3 @@ def main(args=None):
 if __name__ == '__main__':
 
     main()
-
-    

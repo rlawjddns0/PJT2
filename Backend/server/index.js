@@ -6,7 +6,14 @@ const saltRounds=10
 const express = require('express');
 const router=require('./router/index')
 const schedule=require('node-schedule')
-const {spawn}=require('child_process')
+const AWS = require('aws-sdk');
+const S3_ID = "AKIAXNNAAPAAH7JCPOPR";
+const SECRET = "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"
+const s3 = new AWS.S3({
+    accessKeyId: S3_ID,
+    secretAccessKey: SECRET
+});
+
 // Websocket 서버 구동을 위한 서버 코드입니다.
 
 // 노드 로직 순서
@@ -60,6 +67,13 @@ const roomName = 'team';
 io.on('connection', socket => {
     console.log("소켓 참여~")
     socket.join(roomName);
+
+
+    // 알람
+    socket.on('alertToServer', (data) => {
+        console.log("알람 받음")
+        socket.to(roomName).emit('alertToApp', data);
+    })
 
     //거실 에어컨 켜기
     socket.on('livingroomairOnToServer', ()=>{
@@ -706,10 +720,6 @@ io.on('connection', socket => {
         })
     })
 
-    socket.on('alert',(msg)=>{
-        socket.to(roomName).emit('alertToApp',msg);
-    })
-
     // 청소 관련
     socket.on('cleanerOnToServer', (msg)=>{
         // data = mode, x_min, x_max, y_min, y_max
@@ -865,81 +875,41 @@ io.on('connection', socket => {
     });
 
 
-    // //가전제품 상태변화
-    // socket.on('appliancesChangeToServer',(data)=>{
-    //     socket.to(roomName).emit('appliancesChange',data)
-    //     //1
-    //     //odom.py
-    //     //load_map
-    //     //a_star
-    //     //a_star_local_path
-    //     //path_tracking(가전제품 위치)
-    //     //goal_change
-    
-        
-    //     const idx=data.index
-    //     const sql="select * from appliances where idx=?"
-
-    //     //현재 들어온 가전제품 정보(index, y좌표, x좌표, 현 상태값)
-    //     const result
-    //     DB.query(sql,[idx],(err,data)=>{
-    //         console.log(data)
-    //         if(err){
-    //             console.log(err)
-    //         }else{
-    //             if(data[0].state==1)data[0]=2
-    //             else data[0]=1
-    //             result=data
-    //         }
-    //     })
-
-
-
-
-    //     const opt = {
-    //         shell: true,
-    //         cwd: '../ros2_smart_home/src/sub2'
-    //     }
-    //     const child = spawn('source /opt/ros/foxy/setup.bash && cd ~/jenkins_home/workspace/kjw/ros2_smart_home && . install/setup.bash && cd ../../ros2_smart_home/src/final/launch && ros2 launch appliances_change_launch.py && ros2 run final appliance_control.py'+result[0].x+' '+result[0].y+' '+result[0].idx+' '+result[0].state, opt)
-    //     child.stderr.on('data', function (data) {
-    //         console.error("STDERR:", data.toString());
-    //       });
-    //       child.stdout.on('data', function (data) {
-    //         console.log("STDOUT:", data.toString());
-    //       });
-    //       child.on('exit', function (exitCode) {
-    //         console.log("Child exited with code: " + exitCode);
-    //       });
-    //       console.log("실행~")
-
-
-
-
-
-
-
-    // })
-
- 
-
-
-   
-
-
     //터틀봇에서 소지품 찾았다고 연락이 온다~
     socket.on('findBelongingsToServer',(data)=>{
         
-
         //디비에 저장
         console.log("터틀봇에게 분실물 찾았다고 왔다~~")
+        buffer = Buffer.from(data.photo, "base64");
+        file_path = path.join(picPath, "./" + data.datetime.replace(/:/gi, "-") +".jpg")
+        fs.writeFileSync(file_path, buffer); // 이미지 파일 resource에 저장
+        
+        const uploadFile = (path) => {
+            const fileContent = fs.readFileSync(path) // 파일을 읽어서
+            const params = {
+                Bucket: 'ssavis',
+                Key: data.datetime.replace(/:/gi, "-") +".jpg",
+                Body: fileContent
+            }
+            s3.upload(params, function(err, data) {
+                if (err) {throw err;}
+                console.log('File Uploaded Successfully')
+                console.log(data)
+                Location = data.Location
+            })
+        }
+        uploadFile(file_path)
+
         const type=data.type
         const user_no=data.user_no
-        const photo=data.photo
-        const flag=false
+        const photo=Location
+        const flag= true
         const datetime=data.datetime
-        const sql='insert into belongings(type,user_no,photo,flag,datetime) values(?,?,?,?,?)'
-        const param=[type,user_no,photo,flag,datetime]
-        DB.query(sql,param,(err,data)=>{
+        const position=data.position
+        const sql='insert into belongings(type, user_no, photo, flag, datetime, position) values(?,?,?,?,?,?)'
+        const param=[type, user_no, photo, flag, datetime, position]
+        console.log(param)
+        DB.query(sql, param, (err, data)=>{
             if(err){
                 console.log(err)
             }
@@ -1051,38 +1021,4 @@ io.on('connection', socket => {
         socket.to(roomName).emit('modeOff',data[0].iot)
 
     })
-
-
-    //모든 방 청소 요청
-    socket.on('cleanAllRoomToServer',(data)=>{
-        socket.to(roomName).emit('cleanAllRoom')
-    })
-
-
-    socket.on('cleanerOnToServer', () => {
-        // 명령어, 그냥 결과를 보기 위한 함수,
-        // 'call C:/dev/ros2_eloquent/setup.bat && call C:/Users/multicampus/Desktop/S05P21B202/ros2_smart_home/install/local_setup.bat && odom.py'
-        // {cwd: 'C:/Users/multicampus/Desktop/S05P21B202/ros2_smart_home/src/sub2/sub2/'
-        console.log("청소 시작")
-
-        const opt = {
-            shell: true,
-            cwd: 'C:/Users/multicampus/Desktop/pjt2/day20210906/S05P21B202/ros2_smart_home/src/sub2/sub2'
-        }
-        const child = spawn('call C:/dev/ros2_eloquent/setup.bat && call C:/Users/multicampus/Desktop/pjt2/day20210906/S05P21B202/ros2_smart_home/install/local_setup.bat && load_map.py', opt)
-        child.stderr.on('data', function (data) {
-            console.error("STDERR:", data.toString());
-          });
-          child.stdout.on('data', function (data) {
-            console.log("STDOUT:", data.toString());
-          });
-          child.on('exit', function (exitCode) {
-            console.log("Child exited with code: " + exitCode);
-          });
-          console.log("실행~")
-        
-        // socket.to(roomName).emit('cleanerOn'); // 일단 소켓에 cleanerOn을 보내긴 하는데 안쓸 수도?
-    })
-   
-
 })

@@ -172,7 +172,7 @@ class followTheCarrot(Node):
                             self.out_vel = 0.0
                             self.out_rad_vel = theta * 0.30
                         else:
-                            self.out_vel = 0.7
+                            self.out_vel = 0.6
                             self.out_rad_vel = theta * 0.30
                         
                     # 전방 충돌 상황
