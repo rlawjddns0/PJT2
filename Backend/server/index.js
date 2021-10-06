@@ -73,6 +73,7 @@ io.on('connection', socket => {
     // socket.emit("olist", cname)
     socket.on('oflag', (data) => {
         console.log(data)
+        console.log("??")
     })
     socket.on('cname', (data) => {
         console.log(data)
