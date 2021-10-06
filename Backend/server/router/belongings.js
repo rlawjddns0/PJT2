@@ -24,7 +24,7 @@ const { application } = require('express');
 router.get('/list/:user_no',function(req,res){
     const user_no=req.params.user_no
     //현재 사용중인 유저의 분실물중 찾지 못한것(false값)들
-    DB.query('select * from belongings where user_no=?',[user_no,1],
+    DB.query('select * from belongings where user_no=?',[user_no],
     (err,data)=>{
         if(err)console.log(err)
         
