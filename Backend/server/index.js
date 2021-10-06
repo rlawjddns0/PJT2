@@ -877,13 +877,12 @@ io.on('connection', socket => {
 
     //터틀봇에서 소지품 찾았다고 연락이 온다~
     socket.on('findBelongingsToServer',(data)=>{
-        const Location=null
         //디비에 저장
         console.log("터틀봇에게 분실물 찾았다고 왔다~~")
         buffer = Buffer.from(data.photo, "base64");
         file_path = path.join(picPath, "./" + data.datetime.replace(/:/gi, "-") +".jpg")
         fs.writeFileSync(file_path, buffer); // 이미지 파일 resource에 저장
-        
+        var Location
         const uploadFile = (path) => {
             const fileContent = fs.readFileSync(path) // 파일을 읽어서
             const params = {
@@ -902,7 +901,12 @@ io.on('connection', socket => {
         console.log(Location)
         const type=data.type
         const user_no=data.user_no
-        const photo=Location
+        var photo
+        setTimeout(function() {
+            console.log(Location)
+            photo=Location
+          }, 3000);
+        console.log(photo)
         const flag= true
         const datetime=data.datetime
         const position=data.position
@@ -914,7 +918,7 @@ io.on('connection', socket => {
                 console.log(err)
             }
         })
-
+        console.log("fsljfa;" + flag)
         //먼저 애플리케이션에 알람 보내고~
         socket.to(roomName).emit('alert',"분실물 발견")
 
