@@ -9,7 +9,7 @@ const schedule=require('node-schedule')
 const AWS = require('aws-sdk');
 
 // aws S3 사용
-AWS.config.loadFromPath(__dirname + "/../config/awsconfig.json");
+AWS.config.loadFromPath(__dirname + "/config/awsconfig.json");
 let s3 = new AWS.S3();
 // Websocket 서버 구동을 위한 서버 코드입니다.
 
