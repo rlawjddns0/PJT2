@@ -61,6 +61,13 @@ io.on('connection', socket => {
     console.log("소켓 참여~")
     socket.join(roomName);
 
+
+    // 알람
+    socket.on('alertToServer', (data) => {
+        console.log("알람 받음")
+        socket.to(roomName).emit('alertToApp', data);
+    })
+
     //거실 에어컨 켜기
     socket.on('livingroomairOnToServer', ()=>{
         const sql="select * from appliances where idx=10"
