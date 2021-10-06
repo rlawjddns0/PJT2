@@ -875,7 +875,7 @@ io.on('connection', socket => {
         // fs.writeFileSync(path.join(picPath, "./" + data.datetime.replace(/:/gi, "-") +".jpg"), buffer);
         const type=data.type
         const user_no=data.user_no
-        const photo=None
+        const photo=false
         const flag= true
         const datetime=data.datetime
         const position=data.position
