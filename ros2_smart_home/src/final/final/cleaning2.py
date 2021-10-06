@@ -27,11 +27,13 @@ def disconnect():
 @sio.on('cleanerControl')
 def turn_on_cleaner(data):
     global m_control_cmd, x_min, x_max, y_min, y_max
+    print(data)
     m_control_cmd = data[0]["no"]
     x_min = data[0]["x1"]
     x_max = data[0]["x2"]
     y_min = data[0]["y1"]
     y_max = data[0]["y2"]
+    print("2: ", m_control_cmd, x_min, x_max, y_min, y_max)
     # m_control_cmd, x_min, x_max, y_min, y_max = data[0], data[1], data[2], data[3], data[4]
 
 def get_global_var():
@@ -269,15 +271,15 @@ class cleaning(Node):
                         print(self.point[0], self.point[1])
                         print("이동 가능한 위치가 아닙니다.")
                     # 다음 입력할 위치 선정
-                    self.j += 30
+                    self.j += 10
                     if self.j >= self.y_max: # j를 다 해봤으면
                         # i 변경
-                        self.i += 30
+                        self.i += 10
                         self.j = self.y_min
                     if self.i >= self.x_max:
                         print("모두 청소 완료!")
                         if self.alt == 0:
-                            sio.emit("alertToServer")
+                            sio.emit("alertToServer", "청소 끝!")
                             print("송신 완료!")
                             self.alt = 1
                             m_control_cmd = 0
