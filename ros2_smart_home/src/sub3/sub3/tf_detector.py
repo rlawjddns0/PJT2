@@ -8,7 +8,7 @@ import time
 from sensor_msgs.msg import CompressedImage, LaserScan
 from nav_msgs.msg import Odometry
 from ssafy_msgs.msg import BBox
-
+import datetime
 import tensorflow as tf
 
 from sub2.ex_calib import *
@@ -402,7 +402,17 @@ def main(args=None):
                             print(oflag)
                             oindex = [ostate_list[0][0]+odoms[0], ostate_list[0][1]+odoms[1]]
                             print(oindex)
-                            sio.emit("oflag", [oindex, cname])
+                            
+                            b64data = base64.b64encode(image_process)
+
+                            data = {
+                                "type": olist.index(cname),
+                                "user_no": 1,
+                                "photo": b64data.decode('utf-8'),
+                                "datetime": datetime.datetime.now()
+                                "position": str(oindex[0]) + ',' + str(oindex[1])
+                            }
+                            sio.emit("oflag", data)
                             # cv2.imwrite("C:/Users/multicampus/Videos/Captures/detected/"+cname+".png", image_process)
                 
             image_process = draw_pts_img(image_process, xy_i[:, 0].astype(np.int32),
