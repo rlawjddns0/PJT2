@@ -875,18 +875,18 @@ io.on('connection', socket => {
         // const picPath = path.join(__dirname, "/../resource/");
         buffer = Buffer.from(data.photo, "base64");
         // console.log(buffer) // 버퍼까지 확인
+        fs.writeFileSync(path.join(picPath, "./" + data.datetime.replace(/:/gi, "-") +".jpg"), buffer);
         var imgParam = {
             'Bucket': 'ssavis',
             'Key': 'image/' + data.datetime.replace(/:/gi, "-") +".jpg",
             'ACL': 'publick-read',
-            'Body': fs.createReadStream(buffer),
+            'Body': fs.createReadStream(path.join(picPath, "./" + data.datetime.replace(/:/gi, "-") +".jpg"))
             // 'ContentType': 'image/png'
         }
         s3.upload(imgParam, function(err, data) {
             console.log(err);
             console.log(data);
         })
-        // fs.writeFileSync(path.join(picPath, "./" + data.datetime.replace(/:/gi, "-") +".jpg"), buffer);
         const type=data.type
         const user_no=data.user_no
         const photo=data.datetime.replace(/:/gi, "-") +".jpg"
