@@ -879,7 +879,7 @@ io.on('connection', socket => {
         const flag= true
         const datetime=data.datetime
         const position=data.position
-        const sql='insert into belongings(type,user_no,photo,flag,datetime) values(?,?,?,?,?,?)'
+        const sql='insert into belongings(type, user_no, photo, flag, datetime, position) values(?,?,?,?,?,?)'
         const param=[type, user_no, photo, flag, datetime, position]
         console.log(param)
         DB.query(sql, param, (err, data)=>{
