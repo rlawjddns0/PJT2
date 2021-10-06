@@ -6,7 +6,11 @@ const saltRounds=10
 const express = require('express');
 const router=require('./router/index')
 const schedule=require('node-schedule')
-const {spawn}=require('child_process')
+const AWS = require('aws-sdk');
+
+// aws S3 사용
+AWS.config.loadFromPath(__dirname + "/../config/awsconfig.json");
+let s3 = new AWS.S3();
 // Websocket 서버 구동을 위한 서버 코드입니다.
 
 // 노드 로직 순서
@@ -864,15 +868,25 @@ io.on('connection', socket => {
     //터틀봇에서 소지품 찾았다고 연락이 온다~
     socket.on('findBelongingsToServer',(data)=>{
         
-
         //디비에 저장
         console.log("터틀봇에게 분실물 찾았다고 왔다~~")
-        const img = data.photo
+        // const img = data.photo
         // console.log("img: ", img) 이미지 잘 오는거 확인
-        const picPath = path.join(__dirname, "/../resource/");
+        // const picPath = path.join(__dirname, "/../resource/");
         buffer = Buffer.from(data.photo, "base64");
-        console.log(buffer) // 버퍼까지 확인
-        fs.writeFileSync(path.join(picPath, "./" + data.datetime.replace(/:/gi, "-") +".jpg"), buffer);
+        // console.log(buffer) // 버퍼까지 확인
+        var imgParam = {
+            'Bucket': 'ssavis',
+            'Key': 'image/' + data.datetime.replace(/:/gi, "-") +".jpg",
+            'ACL': 'publick-read',
+            'Body': fs.createReadStream(buffer),
+            // 'ContentType': 'image/png'
+        }
+        s3.upload(imgParam, function(err, data) {
+            console.log(err);
+            console.log(data);
+        })
+        // fs.writeFileSync(path.join(picPath, "./" + data.datetime.replace(/:/gi, "-") +".jpg"), buffer);
         const type=data.type
         const user_no=data.user_no
         const photo=data.datetime.replace(/:/gi, "-") +".jpg"
