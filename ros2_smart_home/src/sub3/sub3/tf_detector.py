@@ -16,6 +16,17 @@ from sub2.ex_calib import *
 from object_detection.utils import label_map_util
 from object_detection.utils import visualization_utils as vis_util
 
+import socketio
+sio = socketio.Client()
+
+@sio.event
+def connect():
+    print('connection established')
+
+@sio.event
+def disconnect():
+    print('disconnected from server')
+
 # 설치한 tensorflow를 tf 로 import 하고,
 # object_detection api 내의 utils인 vis_util과 label_map_util도 import해서
 # ROS 통신으로 들어오는 이미지의 객체 인식 결과를 ROS message로 송신하는 노드입니다.
@@ -90,6 +101,8 @@ class detection_net_class():
         self.category_index = category_index
         # print(self.category_index)
 
+        sio.connect('http://j5b202.p.ssafy.io:12001/')
+        
         #init tensor
         self.image_tensor = self.detection_graph.get_tensor_by_name('image_tensor:0')
         self.boxes = self.detection_graph.get_tensor_by_name('detection_boxes:0')
@@ -97,6 +110,7 @@ class detection_net_class():
         self.classes = self.detection_graph.get_tensor_by_name('detection_classes:0')
         self.num_detections = \
              self.detection_graph.get_tensor_by_name('num_detections:0')
+
 
     def inference(self, image_np, category_index):
         image_np_expanded = np.expand_dims(image_np, axis=0)
@@ -118,9 +132,9 @@ class detection_net_class():
 
         global cname
         global cnum
-        global oindex
-        global oflag
-        oflag = [False]*4
+        # global oflag
+        # global oindex
+        # oflag = [False]*4
 
         _, cname, cnum = vis_util.visualize_boxes_and_labels_on_image_array(
                         image_process,
@@ -289,6 +303,8 @@ def main(args=None):
     subscription_scan
     subscription_img
     
+    oflag = [False]*4
+    olist = ['bag', 'key', 'wallet', ' remote controller']
     # 로직 8. lidar2img 좌표 변환 클래스 정의
     # sub2의 좌표 변환 클래스를 가져와서 정의. sub2.ex_calib에서 다 가져왔음
 
@@ -375,16 +391,17 @@ def main(args=None):
                 ## 대표값이 존재하면 
                 if not np.isnan(ostate[0]):
                     ostate_list.append(ostate)
-                    if len(cname)>0 and (cname in ['bag', 'key', 'wallet', ' remote controller']) and cnum>=60 :
-                        length = len(ostate_list)-1
-                        oindex = [ostate_list[length][0]+odoms[0], ostate_list[length][1]+odoms[1]]
-                        print(oindex)
-                        cv2.imwrite("C:/Users/multicampus/Videos/Captures/detected/"+cname+".png", image_process)
-
 
                 for _ in ostate_list:
                     distance = math.sqrt(math.pow(ostate_list[0][0],2)+math.pow(ostate_list[0][1],2))
                     cv2.putText(image_process,str(distance),(30,200), cv2.FONT_HERSHEY_SIMPLEX, 1,(255,255,255), 2, 0)
+                    if len(cname)>0 and (cname in olist) and cnum>=60 :
+                        if 0 <= olist.index(cname) < 4 and not oflag[olist.index(cname)]:
+                            oflag[olist.index(cname)] = True
+                            print(oflag)
+                            oindex = [ostate_list[0][0]+odoms[0], ostate_list[0][1]+odoms[1]]
+                            print(oindex)
+                            cv2.imwrite("C:/Users/multicampus/Videos/Captures/detected/"+cname+".png", image_process)
                 
             image_process = draw_pts_img(image_process, xy_i[:, 0].astype(np.int32),
                                             xy_i[:, 1].astype(np.int32))
