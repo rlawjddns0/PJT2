@@ -873,13 +873,11 @@ io.on('connection', socket => {
         
         //디비에 저장
         console.log("터틀봇에게 분실물 찾았다고 왔다~~")
-        // const img = data.photo
-        // console.log("img: ", img) 이미지 잘 오는거 확인
-        // const picPath = path.join(__dirname, "/../resource/");
         buffer = Buffer.from(data.photo, "base64");
         file_path = path.join(picPath, "./" + data.datetime.replace(/:/gi, "-") +".jpg")
-        // console.log(buffer) // 버퍼까지 확인
-        fs.writeFileSync(file_path, buffer);
+        fs.writeFileSync(file_path, buffer); // 이미지 파일 resource에 저장
+        
+        var Location
         const uploadFile = (path) => {
             const fileContent = fs.readFileSync(path) // 파일을 읽어서
             const params = {
@@ -891,13 +889,14 @@ io.on('connection', socket => {
                 if (err) {throw err;}
                 console.log('File Uploaded Successfully')
                 console.log(data)
+                Location = data.Location
             })
         }
         uploadFile(file_path)
-        
+
         const type=data.type
         const user_no=data.user_no
-        const photo=data.datetime.replace(/:/gi, "-") +".jpg"
+        const photo=Location
         const flag= true
         const datetime=data.datetime
         const position=data.position
