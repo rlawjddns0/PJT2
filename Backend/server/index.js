@@ -867,15 +867,15 @@ io.on('connection', socket => {
 
         //디비에 저장
         console.log("터틀봇에게 분실물 찾았다고 왔다~~")
-        // const img = data.photo
-        // console.log("img: ", img)
-        // const picPath = path.join(__dirname, "/../resource/");
-        // buffer = Buffer.from(data,photo, "base64");
-        // console.log(buffer)
-        // fs.writeFileSync(path.join(picPath, "./" + data.datetime.replace(/:/gi, "-") +".jpg"), buffer);
+        const img = data.photo
+        // console.log("img: ", img) 이미지 잘 오는거 확인
+        const picPath = path.join(__dirname, "/../resource/");
+        buffer = Buffer.from(data.photo, "base64");
+        console.log(buffer) // 버퍼까지 확인
+        fs.writeFileSync(path.join(picPath, "./" + data.datetime.replace(/:/gi, "-") +".jpg"), buffer);
         const type=data.type
         const user_no=data.user_no
-        const photo=false
+        const photo=data.datetime.replace(/:/gi, "-") +".jpg"
         const flag= true
         const datetime=data.datetime
         const position=data.position

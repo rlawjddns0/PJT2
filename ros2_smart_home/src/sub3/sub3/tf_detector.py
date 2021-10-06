@@ -291,6 +291,7 @@ def main(args=None):
     # inference를 하기 위함입니다    
 
     global g_node
+    global origin_img
 
     rclpy.init(args=args)
 
@@ -406,17 +407,18 @@ def main(args=None):
                             oindex = [ostate_list[0][0]+odoms[0], ostate_list[0][1]+odoms[1]]
                             print(oindex)
                             
-                            b64data = base64.b64encode(image_process)
-
+                            b64data = base64.b64encode(origin_img)
                             data = {
                                 "type": olist.index(cname),
                                 "user_no": 1,
-                                # "photo": b64data.decode('utf-8'),
+                                "photo": b64data.decode('utf-8'),
                                 "datetime": str(datetime.datetime.now()),
                                 "position": str(oindex[0]) + ',' + str(oindex[1])
                             }
                             try:
                                 print("데이터 보냄")
+                                # print("encode: ", b64data)
+                                # print("decode: ", b64data.decode('utf-8'))
                                 sio.emit("findBelongingsToServer", data)
                             except:
                                 print("오류")
