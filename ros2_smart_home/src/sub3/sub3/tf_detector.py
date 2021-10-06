@@ -15,6 +15,17 @@ from sub2.ex_calib import *
 from object_detection.utils import label_map_util
 from object_detection.utils import visualization_utils as vis_util
 
+import socketio
+sio = socketio.Client()
+
+@sio.event
+def connect():
+    print('connection established')
+
+@sio.event
+def disconnect():
+    print('disconnected from server')
+
 # 설치한 tensorflow를 tf 로 import 하고,
 # object_detection api 내의 utils인 vis_util과 label_map_util도 import해서
 # ROS 통신으로 들어오는 이미지의 객체 인식 결과를 ROS message로 송신하는 노드입니다.
@@ -90,6 +101,9 @@ class detection_net_class():
         self.detection_graph = graph
         self.category_index = category_index
 
+        	
+        sio.connect('http://j5b202.p.ssafy.io:12001/')
+        
         #init tensor
         self.image_tensor = self.detection_graph.get_tensor_by_name('image_tensor:0')
         self.boxes = self.detection_graph.get_tensor_by_name('detection_boxes:0')
@@ -200,11 +214,11 @@ def main(args=None):
 
     MODEL_NAME = 'new object detector'
 
-    PATH_TO_WEIGHT = os.path.join('C:\\Users\\multicampus\\Desktop\\S05P21B202\\ros2_smart_home\\src\\sub3\\sub3', 'model_weights', \
+    PATH_TO_WEIGHT = os.path.join('C:\\Users\\multicampus\\Desktop\\backend\\S05P21B202\\ros2_smart_home\\src\\sub3\\sub3', 'model_weights', \
         MODEL_NAME, 'frozen_inference_graph.pb')
 
     print('PATH_TO_WEIGHT : ' + PATH_TO_WEIGHT)
-    PATH_TO_LABELS = os.path.join('C:\\Users\\multicampus\\Desktop\\S05P21B202\\ros2_smart_home\\src\\sub3\\sub3', 'model_weights', \
+    PATH_TO_LABELS = os.path.join('C:\\Users\\multicampus\\Desktop\\backend\\S05P21B202\\ros2_smart_home\\src\\sub3\\sub3', 'model_weights', \
         'data', 'labelmap.pbtxt')
     print('PATH_TO_LABELS : ' + PATH_TO_LABELS)
 

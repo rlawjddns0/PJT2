@@ -22,10 +22,10 @@ des_x, des_y, target_num, target_status = 0, 0, 0, 0
 @sio.on('applianceControl')
 def appliance_var(data):
     global des_x, des_y, target_num, target_status
-    des_x = int(data[0])
-    des_y = int(data[1])
-    target_num = int(data[2])
-    target_status = int(data[3])
+    des_x = data[0]["x"]
+    des_y = data[0]["y"]
+    target_num = data[0]["idx"]
+    target_status = data[0]["state"]
     print(des_x, des_y, target_num, target_status)
 
 def get_global_var():
@@ -38,7 +38,7 @@ def reset_global_var():
 class appliance_control(Node):
     def __init__(self):
         super().__init__('goal_change')
-        sio.connect('http://127.0.0.1:12001/')
+        sio.connect('http://j5b202.p.ssafy.io:12001/')
         des_x, des_y, target_num, target_status = get_global_var()
         self.target = target_num # 목표 가전
         self.target_status = target_status # 켤지 끌지
@@ -113,10 +113,15 @@ class appliance_control(Node):
             self.target_status = target_status
             self.goal_callback()
         if not self.path_exists: # 거의 도착 했으면
+            print("도착")
             # 한 바퀴 회전하며 마주보는 순간에 동작해야 함.
             if self.is_app_status: # 앱 정보가 들어오고 있을 때
+                print("앱 정보 들어옴")
                 self.app_control_msg.data[self.target] = self.target_status
+                print("앱 상태: ", self.app_status_msg.data)
+                print("제어: ", self.target_status)
                 if self.app_status_msg.data[self.target] != self.target_status:
+                    
                     # 회전하면서
                     self.cmd_msg.angular.z=0.3
                     self.cmd_pub.publish(self.cmd_msg)
@@ -124,8 +129,9 @@ class appliance_control(Node):
                     print("가전 상태: ", self.app_status_msg.data)
                     print("가전 제어: ", self.app_control_msg.data)
                 else:
+                    pass
                     # 종료
-                    print("종료!")
+                    # print("종료!")
 
 
 def main(args=None):
