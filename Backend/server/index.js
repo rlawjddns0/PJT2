@@ -876,18 +876,18 @@ io.on('connection', socket => {
 
 
     //터틀봇에서 소지품 찾았다고 연락이 온다~
-    socket.on('findBelongingsToServer',(data)=>{
+    socket.on('findBelongingsToServer',(data_socket)=>{
         //디비에 저장
         console.log("터틀봇에게 분실물 찾았다고 왔다~~")
-        buffer = Buffer.from(data.photo, "base64");
-        file_path = path.join(picPath, "./" + data.datetime.replace(/:/gi, "-") +".jpg")
+        buffer = Buffer.from(data_socket.photo, "base64");
+        file_path = path.join(picPath, "./" + data_socket.datetime.replace(/:/gi, "-") +".jpg")
         fs.writeFileSync(file_path, buffer); // 이미지 파일 resource에 저장
         var Location
         const uploadFile = (path) => {
             const fileContent = fs.readFileSync(path) // 파일을 읽어서
             const params = {
                 Bucket: 'ssavis',
-                Key: data.datetime.replace(/:/gi, "-") +".jpg",
+                Key: data_socket.datetime.replace(/:/gi, "-") +".jpg",
                 Body: fileContent
             }
             s3.upload(params, function(err, data) {
@@ -895,39 +895,35 @@ io.on('connection', socket => {
                 console.log('File Uploaded Successfully')
                 console.log(data)
                 Location = data.Location
+                const type=data_socket.type
+                const user_no=data_socket.user_no
+                const photo=Location
+                const flag= true
+                const datetime=data_socket.datetime
+                const position=data_socket.position
+                const sql='insert into belongings(type, user_no, photo, flag, datetime, position) values(?,?,?,?,?,?)'
+                const param=[type, user_no, photo, flag, datetime, position]
+                console.log(param)
+                DB.query(sql, param, (err, data)=>{
+                    if(err){
+                        console.log(err)
+                    }
+                })
             })
         }
         uploadFile(file_path)
         console.log(Location)
-        const type=data.type
-        const user_no=data.user_no
-        var photo
-        setTimeout(function() {
-            console.log(Location)
-            photo=Location
-          }, 3000);
-        console.log(photo)
-        const flag= true
-        const datetime=data.datetime
-        const position=data.position
-        const sql='insert into belongings(type, user_no, photo, flag, datetime, position) values(?,?,?,?,?,?)'
-        const param=[type, user_no, photo, flag, datetime, position]
-        console.log(param)
-        DB.query(sql, param, (err, data)=>{
-            if(err){
-                console.log(err)
-            }
-        })
+        
         console.log("fsljfa;" + flag)
         //먼저 애플리케이션에 알람 보내고~
-        socket.to(roomName).emit('alert',"분실물 발견")
+        socket.to(roomName).emit('alertToApp',"분실물 발견")
 
     })
 
     //침입자 발견시
     socket.on('findIntruderToServer',(data)=>{
         //먼저 애플리케이션에 알람 보내고~
-        socket.to(roomName).emit('alert',"침입자 발견")
+        socket.to(roomName).emit('alertToApp',"침입자 발견")
         const user_no=data.user_no
         const photo=data.photo
         const datetime=data.datetime
