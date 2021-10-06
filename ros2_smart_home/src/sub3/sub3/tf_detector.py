@@ -6,6 +6,7 @@ import os
 from rclpy.node import Node
 import time
 from sensor_msgs.msg import CompressedImage, LaserScan
+from nav_msgs.msg import Odometry
 from ssafy_msgs.msg import BBox
 
 import tensorflow as tf
@@ -87,6 +88,7 @@ class detection_net_class():
         self.sess = sess
         self.detection_graph = graph
         self.category_index = category_index
+        # print(self.category_index)
 
         #init tensor
         self.image_tensor = self.detection_graph.get_tensor_by_name('image_tensor:0')
@@ -96,7 +98,7 @@ class detection_net_class():
         self.num_detections = \
              self.detection_graph.get_tensor_by_name('num_detections:0')
 
-    def inference(self, image_np):
+    def inference(self, image_np, category_index):
         image_np_expanded = np.expand_dims(image_np, axis=0)
         
         t_start = time.time()
@@ -114,15 +116,21 @@ class detection_net_class():
 
         classes_pick = classes[:, idx_detect]
 
-        vis_util.visualize_boxes_and_labels_on_image_array(image_process,
-                np.squeeze(boxes),
-                np.squeeze(classes).astype(np.int32),
-                np.squeeze(scores),
-                self.category_index,
-                use_normalized_coordinates=True,
-                min_score_thresh=0.5,
-                line_thickness=8)
-                
+        global cname
+        global cnum
+        global oindex
+        global oflag
+        oflag = [False]*4
+
+        _, cname, cnum = vis_util.visualize_boxes_and_labels_on_image_array(
+                        image_process,
+                        np.squeeze(boxes),
+                        np.squeeze(classes).astype(np.int32),
+                        np.squeeze(scores),
+                        category_index,
+                        use_normalized_coordinates=True,
+                        min_score_thresh=0.5,
+                        line_thickness=8)
         infer_time = time.time()-t_start
 
         return image_process, infer_time, boxes_detect, scores, classes_pick
@@ -154,8 +162,6 @@ def img_callback(msg):
 
 def scan_callback(msg):
 
-    print("스캔콜백햇어?")
-
     global xyz
 
     R = np.array(msg.ranges)
@@ -169,7 +175,18 @@ def scan_callback(msg):
         y.reshape([-1, 1]),
         z.reshape([-1, 1])
     ], axis=1)
-   
+
+def odom_callback(msg):
+    global is_odom
+    global odom_msg
+    
+    is_odom=True
+    odom_msg=msg
+
+    # print("odoms: ")
+    # print(odom_msg)
+    global odoms
+    odoms = [odom_msg.pose.pose.position.x, odom_msg.pose.pose.position.y]   
 
 def main(args=None):
     # 로직 2. pretrained file and label map load    
@@ -206,7 +223,7 @@ def main(args=None):
         'data', 'labelmap.pbtxt')
     print('PATH_TO_LABELS : ' + PATH_TO_LABELS)
 
-    NUM_CLASSES = 90
+    NUM_CLASSES = 11
 
     # print("logic1")
     # Loading label map
@@ -216,6 +233,7 @@ def main(args=None):
                                                             use_display_name=True)
     
     category_index = label_map_util.create_category_index(categories)
+    # print(category_index)
 
     # 로직 3. detection model graph 생성
     # tf.Graph()를 하나 생성하고, 이전에 불러들인 pretrained file 안의 뉴럴넷 파라메터들을
@@ -265,6 +283,9 @@ def main(args=None):
 
     subscription_scan = g_node.create_subscription(LaserScan, '/scan', scan_callback, 3)
 
+    subscription_odom = g_node.create_subscription(Odometry,'/odom', odom_callback, 10)
+
+    subscription_odom
     subscription_scan
     subscription_img
     
@@ -285,7 +306,7 @@ def main(args=None):
             rclpy.spin_once(g_node)
 
         # 로직 10. object detection model inference
-        image_process, infer_time, boxes_detect, scores, classes_pick = ssd_net.inference(img_bgr)
+        image_process, infer_time, boxes_detect, scores, classes_pick = ssd_net.inference(img_bgr, category_index)
 
         # 로직 11. 라이다-카메라 좌표 변환 및 정사영
         # sub2 에서 ex_calib 에 했던 대로 라이다 포인트들을
@@ -354,14 +375,20 @@ def main(args=None):
                 ## 대표값이 존재하면 
                 if not np.isnan(ostate[0]):
                     ostate_list.append(ostate)
+                    if len(cname)>0 and (cname in ['bag', 'key', 'wallet', ' remote controller']) and cnum>=60 :
+                        length = len(ostate_list)-1
+                        oindex = [ostate_list[length][0]+odoms[0], ostate_list[length][1]+odoms[1]]
+                        print(oindex)
+                        cv2.imwrite("C:/Users/multicampus/Videos/Captures/detected/"+cname+".png", image_process)
+
 
                 for _ in ostate_list:
                     distance = math.sqrt(math.pow(ostate_list[0][0],2)+math.pow(ostate_list[0][1],2))
                     cv2.putText(image_process,str(distance),(30,200), cv2.FONT_HERSHEY_SIMPLEX, 1,(255,255,255), 2, 0)
+                
             image_process = draw_pts_img(image_process, xy_i[:, 0].astype(np.int32),
                                             xy_i[:, 1].astype(np.int32))
 
-            # print(ostate_list)
 
         visualize_images(image_process, infer_time)
 
