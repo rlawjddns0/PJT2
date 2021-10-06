@@ -734,6 +734,7 @@ io.on('connection', socket => {
             if(err){
                 console.log(err)
             }else{
+                console.log(data)
                 socket.to(roomName).emit('cleanerControl', data);
             }
         })
@@ -745,6 +746,7 @@ io.on('connection', socket => {
             if(err){
                 console.log(err)
             }else{
+                console.log(data)
                 socket.to(roomName).emit('cleanerControl', data);
             }
         })
@@ -756,6 +758,7 @@ io.on('connection', socket => {
             if(err){
                 console.log(err)
             }else{
+                console.log(data)
                 socket.to(roomName).emit('cleanerControl', data);
             }
         })    
@@ -767,6 +770,7 @@ io.on('connection', socket => {
             if(err){
                 console.log(err)
             }else{
+                console.log(data)
                 socket.to(roomName).emit('cleanerControl', data);
             }
         })    
@@ -778,6 +782,7 @@ io.on('connection', socket => {
             if(err){
                 console.log(err)
             }else{
+                console.log(data)
                 socket.to(roomName).emit('cleanerControl', data);
             }
         })    
@@ -790,6 +795,7 @@ io.on('connection', socket => {
             if(err){
                 console.log(err)
             }else{
+                console.log(data)
                 socket.to(roomName).emit('cleanerControl', data);
             }
         })    
@@ -801,6 +807,7 @@ io.on('connection', socket => {
             if(err){
                 console.log(err)
             }else{
+                console.log(data)
                 socket.to(roomName).emit('cleanerControl', data);
             }
         })    

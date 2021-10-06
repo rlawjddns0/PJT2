@@ -50,12 +50,16 @@ router.get('/customList/:user_no',function(req,res){
     
     const user_no=req.params.user_no
     DB.query('select * from mode where user_no=?',[user_no],(err,data)=>{
-        if(err)console.log(err)
-        return res.status(200).json({
-            success:true,
-            msg:"사용자가 설정한 모드",
-            data
-        })
+        if(err{
+            console.log(err)
+        }
+        else if(data.length>0){
+            return res.status(200).json({
+                success:true,
+                msg:"사용자가 설정한 모드",
+                data:data,
+            })
+        }
     })
 
 })
