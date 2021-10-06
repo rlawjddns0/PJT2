@@ -304,8 +304,8 @@ def main(args=None):
     subscription_img
     
 
-    oflag = [False]*4
-    olist = ['bag', 'key', 'wallet', ' remote controller']
+    oflag = [False]*5
+    olist = ['bag', 'key', 'wallet', 'remote controller', 'intruder']
     # 로직 8. lidar2img 좌표 변환 클래스 정의
     # sub2의 좌표 변환 클래스를 가져와서 정의. sub2.ex_calib에서 다 가져왔음
 
@@ -402,8 +402,7 @@ def main(args=None):
                             print(oflag)
                             oindex = [ostate_list[0][0]+odoms[0], ostate_list[0][1]+odoms[1]]
                             print(oindex)
-                            socket.emit("oflag", oindex)
-                            socket.emit("olist", cname)
+                            sio.emit("oflag", [oindex, cname])
                             # cv2.imwrite("C:/Users/multicampus/Videos/Captures/detected/"+cname+".png", image_process)
                 
             image_process = draw_pts_img(image_process, xy_i[:, 0].astype(np.int32),
