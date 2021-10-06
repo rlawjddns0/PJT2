@@ -7,10 +7,13 @@ const express = require('express');
 const router=require('./router/index')
 const schedule=require('node-schedule')
 const AWS = require('aws-sdk');
+const S3_ID = "AKIAXNNAAPAAH7JCPOPR";
+const SECRET = "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"
+const s3 = new AWS.S3({
+    accessKeyId: S3_ID,
+    secretAccessKey: SECRET
+});
 
-// aws S3 사용
-AWS.config.loadFromPath(__dirname + "/config/awsconfig.json");
-let s3 = new AWS.S3();
 // Websocket 서버 구동을 위한 서버 코드입니다.
 
 // 노드 로직 순서
@@ -874,19 +877,24 @@ io.on('connection', socket => {
         // console.log("img: ", img) 이미지 잘 오는거 확인
         // const picPath = path.join(__dirname, "/../resource/");
         buffer = Buffer.from(data.photo, "base64");
+        file_path = path.join(picPath, "./" + data.datetime.replace(/:/gi, "-") +".jpg")
         // console.log(buffer) // 버퍼까지 확인
-        fs.writeFileSync(path.join(picPath, "./" + data.datetime.replace(/:/gi, "-") +".jpg"), buffer);
-        var imgParam = {
-            'Bucket': 'ssavis',
-            'Key': 'image/' + data.datetime.replace(/:/gi, "-") +".jpg",
-            'ACL': 'publick-read',
-            'Body': fs.createReadStream(path.join(picPath, "./" + data.datetime.replace(/:/gi, "-") +".jpg"))
-            // 'ContentType': 'image/png'
+        fs.writeFileSync(file_path, buffer);
+        const uploadFile = (path) => {
+            const fileContent = fs.readFileSync(path) // 파일을 읽어서
+            const params = {
+                Bucket: 'ssavis',
+                Key: data.datetime.replace(/:/gi, "-") +".jpg",
+                Body: fileContent
+            }
+            s3.upload(params, function(err, data) {
+                if (err) {throw err;}
+                console.log('File Uploaded Successfully')
+                console.log(data)
+            })
         }
-        s3.upload(imgParam, function(err, data) {
-            console.log(err);
-            console.log(data);
-        })
+        uploadFile(file_path)
+        
         const type=data.type
         const user_no=data.user_no
         const photo=data.datetime.replace(/:/gi, "-") +".jpg"
