@@ -867,13 +867,13 @@ io.on('connection', socket => {
 
         //디비에 저장
         console.log("터틀봇에게 분실물 찾았다고 왔다~~")
-        console.log(data[0]) // 좌표 [x, y]
-        console.log(data[1]) // 이름 bag
         const img = data.photo
+        console.log("img: ", img)
         // buffer = Buffer.from(message, "base64");
         // fs.writeFileSync(path.join(picPath, "/../client/cam.jpg"), buffer);
         const picPath = path.join(__dirname, "/../resource/");
         buffer = Buffer.from(data,photo, "base64");
+        console.log(buffer)
         fs.writeFileSync(path.join(picPath, "./" + data.datetime.replace(/:/gi, "-") +".jpg"), buffer);
         const type=data.type
         const user_no=data.user_no
@@ -883,6 +883,7 @@ io.on('connection', socket => {
         const position=data.position
         const sql='insert into belongings(type,user_no,photo,flag,datetime) values(?,?,?,?,?,?)'
         const param=[type, user_no, photo, flag, datetime, position]
+        console.log(param)
         DB.query(sql, param, (err, data)=>{
             if(err){
                 console.log(err)

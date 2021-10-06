@@ -10,6 +10,7 @@ from nav_msgs.msg import Odometry
 from ssafy_msgs.msg import BBox
 import datetime
 import tensorflow as tf
+import base64
 
 from sub2.ex_calib import *
 
@@ -409,10 +410,10 @@ def main(args=None):
                                 "type": olist.index(cname),
                                 "user_no": 1,
                                 "photo": b64data.decode('utf-8'),
-                                "datetime": datetime.datetime.now()
+                                "datetime": str(datetime.datetime.now()),
                                 "position": str(oindex[0]) + ',' + str(oindex[1])
                             }
-                            sio.emit("oflag", data)
+                            sio.emit("findBelongingsToServer", data)
                             # cv2.imwrite("C:/Users/multicampus/Videos/Captures/detected/"+cname+".png", image_process)
                 
             image_process = draw_pts_img(image_process, xy_i[:, 0].astype(np.int32),
