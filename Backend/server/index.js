@@ -877,7 +877,6 @@ io.on('connection', socket => {
         file_path = path.join(picPath, "./" + data.datetime.replace(/:/gi, "-") +".jpg")
         fs.writeFileSync(file_path, buffer); // 이미지 파일 resource에 저장
         
-        var Location
         const uploadFile = (path) => {
             const fileContent = fs.readFileSync(path) // 파일을 읽어서
             const params = {
