@@ -877,7 +877,7 @@ io.on('connection', socket => {
 
     //터틀봇에서 소지품 찾았다고 연락이 온다~
     socket.on('findBelongingsToServer',(data)=>{
-        
+        const Location=null
         //디비에 저장
         console.log("터틀봇에게 분실물 찾았다고 왔다~~")
         buffer = Buffer.from(data.photo, "base64");
@@ -899,7 +899,7 @@ io.on('connection', socket => {
             })
         }
         uploadFile(file_path)
-
+        console.log(Location)
         const type=data.type
         const user_no=data.user_no
         const photo=Location

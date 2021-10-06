@@ -49,8 +49,8 @@ router.post('/custom',function(req,res){
 router.get('/customList/:user_no',function(req,res){
     
     const user_no=req.params.user_no
-    DB.query('select * from mode where user_no=?',[user_no],(err,data)=>{
-        if(err{
+    DB.query('select * from mode where user_no=? and no>=0',[user_no],(err,data)=>{
+        if(err){
             console.log(err)
         }
         else if(data.length>0){
@@ -107,6 +107,7 @@ router.get('/current_mode/:user_no',function(req,res){
         }
     })
 })
+
 
 // router.get('/test/:index',function(req,res){
 //     const idx=req.params.index
