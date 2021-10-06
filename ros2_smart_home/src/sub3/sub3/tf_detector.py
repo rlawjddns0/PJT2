@@ -28,6 +28,7 @@ def connect():
 def disconnect():
     print('disconnected from server')
 
+
 # 설치한 tensorflow를 tf 로 import 하고,
 # object_detection api 내의 utils인 vis_util과 label_map_util도 import해서
 # ROS 통신으로 들어오는 이미지의 객체 인식 결과를 ROS message로 송신하는 노드입니다.
@@ -190,6 +191,7 @@ def scan_callback(msg):
         y.reshape([-1, 1]),
         z.reshape([-1, 1])
     ], axis=1)
+    is_scan = True
 
 def odom_callback(msg):
     global is_odom
@@ -409,11 +411,15 @@ def main(args=None):
                             data = {
                                 "type": olist.index(cname),
                                 "user_no": 1,
-                                "photo": b64data.decode('utf-8'),
+                                # "photo": b64data.decode('utf-8'),
                                 "datetime": str(datetime.datetime.now()),
                                 "position": str(oindex[0]) + ',' + str(oindex[1])
                             }
-                            sio.emit("findBelongingsToServer", data)
+                            try:
+                                print("데이터 보냄")
+                                sio.emit("findBelongingsToServer", data)
+                            except:
+                                print("오류")
                             # cv2.imwrite("C:/Users/multicampus/Videos/Captures/detected/"+cname+".png", image_process)
                 
             image_process = draw_pts_img(image_process, xy_i[:, 0].astype(np.int32),
