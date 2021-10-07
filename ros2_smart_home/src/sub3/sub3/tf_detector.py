@@ -309,7 +309,7 @@ def main(args=None):
     
 
     oflag = [False]*5
-    olist = ['bag', 'key', 'wallet', 'remote controller', 'intruder']
+    olist = ['intruder'. 'bag', 'key', 'wallet', 'remote controller']
     # 로직 8. lidar2img 좌표 변환 클래스 정의
     # sub2의 좌표 변환 클래스를 가져와서 정의. sub2.ex_calib에서 다 가져왔음
 
@@ -417,6 +417,7 @@ def main(args=None):
                             }
                             try:
                                 print("데이터 보냄")
+                                print("datetime: ", data["datetime"])
                                 # print("encode: ", b64data)
                                 # print("decode: ", b64data.decode('utf-8'))
                                 if cname != 'intruder':

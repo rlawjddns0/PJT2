@@ -918,25 +918,25 @@ io.on('connection', socket => {
     })
 
     //침입자 발견시
-    socket.on('findIntruderToServer',(data)=>{
+    socket.on('findIntruderToServer',(data_intruder)=>{
         //먼저 애플리케이션에 알람 보내고~
         socket.to(roomName).emit('alertToApp',"침입자 발견")
         //디비에 저장
-        buffer = Buffer.from(data.photo, "base64");
-        file_path = path.join(picPath, "./" + data.datetime.replace(/:/gi, "-") +".jpg")
+        buffer = Buffer.from(data_intruder.photo, "base64");
+        file_path = path.join(picPath, "./" + data_intruder.datetime.replace(/:/gi, "-") +".jpg")
         fs.writeFileSync(file_path, buffer); // 이미지 파일 resource에 저장
         var intruder_img_path
         const uploadFile = (path) => {
             const fileContent = fs.readFileSync(path) // 파일을 읽어서
             const params = {
                 Bucket: 'ssavis',
-                Key: data.datetime.replace(/:/gi, "-") +".jpg",
+                Key: data_intruder.datetime.replace(/:/gi, "-") +".jpg",
                 Body: fileContent
             }
-            s3.upload(params, function(err, data_intruder) {
+            s3.upload(params, function(err, data_upload) {
                 if (err) {throw err;}
                 console.log('File Uploaded Successfully')
-                console.log(data_intruder)
+                console.log(data_upload)
                 intruder_img_path = data_intruder.Location
                 const user_no=data_intruder.user_no
                 const photo=intruder_img_path
