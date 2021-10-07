@@ -29,8 +29,8 @@ setup(
             'odom = final.odom:main',
             'path_tracking = final.path_tracking:main',
             'control_hub = final.control_hub:main'
-            # 'seg_binarizer = sub2.seg_binarizer:main',
-            # 'cleaning2 = sub2.cleaning2:main'
+            'cleaning2 = final.cleaning2:main'
+            # 'patrol = final.patrol:main'
         ],
     },
 )

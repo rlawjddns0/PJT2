@@ -877,6 +877,8 @@ io.on('connection', socket => {
 
     //터틀봇에서 소지품 찾았다고 연락이 온다~
     socket.on('findBelongingsToServer',(data_socket)=>{
+        //먼저 애플리케이션에 알람 보내고~
+        socket.to(roomName).emit('alertToApp',"분실물 발견")
         //디비에 저장
         console.log("터틀봇에게 분실물 찾았다고 왔다~~")
         buffer = Buffer.from(data_socket.photo, "base64");
@@ -915,8 +917,6 @@ io.on('connection', socket => {
         console.log(Location)
         
         console.log("fsljfa;" + flag)
-        //먼저 애플리케이션에 알람 보내고~
-        socket.to(roomName).emit('alertToApp',"분실물 발견")
 
     })
 
@@ -924,16 +924,35 @@ io.on('connection', socket => {
     socket.on('findIntruderToServer',(data)=>{
         //먼저 애플리케이션에 알람 보내고~
         socket.to(roomName).emit('alertToApp',"침입자 발견")
-        const user_no=data.user_no
-        const photo=data.photo
-        const datetime=data.datetime
-        const sql='insert into intruders(user_no,photo,datetime) values(?,?,?)'
-        const param=[user_no,photo,datetime]
-        DB.query(sql,param,(err,data)=>{
-            if(err){
-                console.log(err)
+        //디비에 저장
+        buffer = Buffer.from(data.photo, "base64");
+        file_path = path.join(picPath, "./" + data.datetime.replace(/:/gi, "-") +".jpg")
+        fs.writeFileSync(file_path, buffer); // 이미지 파일 resource에 저장
+        var intruder_img_path
+        const uploadFile = (path) => {
+            const fileContent = fs.readFileSync(path) // 파일을 읽어서
+            const params = {
+                Bucket: 'ssavis',
+                Key: data.datetime.replace(/:/gi, "-") +".jpg",
+                Body: fileContent
             }
-        })
+            s3.upload(params, function(err, data) {
+                if (err) {throw err;}
+                console.log('File Uploaded Successfully')
+                intruder_img_path = data.Location
+                const user_no=data.user_no
+                const photo=intruder_img_path
+                const datetime=data.datetime
+                const sql='insert into intruders(user_no,photo,datetime) values(?,?,?)'
+                const param=[user_no, photo, datetime]
+                DB.query(sql, param, (err, data)=>{
+                    if(err){
+                        console.log(err)
+                    }
+                })
+            })
+        }
+        uploadFile(file_path)
     })
 
     //모드가 시작된다고 온다.~

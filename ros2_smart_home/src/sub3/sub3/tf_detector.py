@@ -401,7 +401,7 @@ def main(args=None):
                     distance = math.sqrt(math.pow(ostate_list[0][0],2)+math.pow(ostate_list[0][1],2))
                     cv2.putText(image_process,str(distance),(30,200), cv2.FONT_HERSHEY_SIMPLEX, 1,(255,255,255), 2, 0)
                     if len(cname)>0 and (cname in olist) and cnum>=60 :
-                        if 0 <= olist.index(cname) < 4 and not oflag[olist.index(cname)]:
+                        if 0 <= olist.index(cname) < 5 and not oflag[olist.index(cname)]:
                             oflag[olist.index(cname)] = True
                             print(oflag)
                             oindex = [ostate_list[0][0]+odoms[0], ostate_list[0][1]+odoms[1]]
@@ -419,7 +419,10 @@ def main(args=None):
                                 print("데이터 보냄")
                                 # print("encode: ", b64data)
                                 # print("decode: ", b64data.decode('utf-8'))
-                                sio.emit("findBelongingsToServer", data)
+                                if cname != 'intruder':
+                                    sio.emit("findBelongingsToServer", data)
+                                else:
+                                    sio.emit("findIntruderToServer", data)
                             except:
                                 print("오류")
                             # cv2.imwrite("C:/Users/multicampus/Videos/Captures/detected/"+cname+".png", image_process)

@@ -8,7 +8,7 @@ import sys
 
 import socketio
 sio = socketio.Client()
-
+# [[x, y, idx, state], [x, y, idx, state], [x, y, idx, state], ...]
 @sio.event
 def connect():
     print('connection established')
@@ -19,6 +19,7 @@ def disconnect():
 
 global des_x, des_y, target_num, target_status
 des_x, des_y, target_num, target_status = 0, 0, 0, 0
+
 @sio.on('applianceControl')
 def appliance_var(data):
     global des_x, des_y, target_num, target_status
@@ -130,6 +131,7 @@ class appliance_control(Node):
                     print("가전 제어: ", self.app_control_msg.data)
                 else:
                     pass
+                    # 다음 인덱스 확인하기
                     # 종료
                     # print("종료!")
 
