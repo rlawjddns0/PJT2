@@ -986,7 +986,7 @@ io.on('connection', socket => {
                     var tmp={}
                     DB.query('select * from appliances where idx=?',[i],(err,result)=>{
                         console.log(i)
-                       tmp={des_x:result[0].x,des_y:result[0].y,target_num:j++,target_status:parseInt(data[0].iot.charAt(result[0].idx))}
+                       tmp={x:result[0].x,y:result[0].y,idx:j++,state:parseInt(data[0].iot.charAt(result[0].idx))}
                        datas.push(tmp)
                     })
                 }
