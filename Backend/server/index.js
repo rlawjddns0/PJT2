@@ -846,7 +846,7 @@ io.on('connection', socket => {
 
     socket.on('PatrolOffToServer', (data) => {
         //security service off~
-        socket.to(roomName).emit('patrolOff', data);
+        socket.to(roomName).emit('patrolOff');
         
     });
 
