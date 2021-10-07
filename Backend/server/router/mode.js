@@ -108,6 +108,23 @@ router.get('/current_mode/:user_no',function(req,res){
     })
 })
 
+router.put('/change/',function(req,res){
+    const user_no=req.body.user_no
+    const mode_no=req.body.mode_no
+    DB.query('update current_mode set mode_no=? where user_no =?',[mode_no,user_no],(err,data)=>{
+        if(err){
+            console.log(err)
+        }else{
+            return res.status(200).json({
+                success:true,
+                msg:"현재 작동 모드 변경",
+    
+            })   
+        }
+    })
+})
+
+
 
 // router.get('/test/:index',function(req,res){
 //     const idx=req.params.index

@@ -117,7 +117,7 @@ io.on('connection', socket => {
     })
     // 방1 불 켜기
     socket.on('light1OnToServer', ()=>{
-        const sql="select * from appliances where idx=7"
+        const sql="select * from appliances where idx=1"
         DB.query(sql,(err,data)=>{
             if(err){
                 console.log(err)
@@ -126,7 +126,7 @@ io.on('connection', socket => {
                 data[0].state=1
                 console.log(data)
                 socket.to(roomName).emit('applianceControl', data);
-                DB.query('update appliances set state=1 where idx=7',(err,data)=>{
+                DB.query('update appliances set state=1 where idx=1',(err,data)=>{
                     if(err){
                         console.log(err)
                     }
@@ -136,7 +136,7 @@ io.on('connection', socket => {
     })
     // 방1 불 끄기
     socket.on('light1OffToServer', ()=>{
-        const sql="select * from appliances where idx=7"
+        const sql="select * from appliances where idx=1"
         DB.query(sql,(err,data)=>{
             if(err){
                 console.log(err)
@@ -145,7 +145,7 @@ io.on('connection', socket => {
                 data[0].state=2
                 console.log(data)
                 socket.to(roomName).emit('applianceControl', data);
-                DB.query('update appliances set state=2 where idx=7',(err,data)=>{
+                DB.query('update appliances set state=2 where idx=1',(err,data)=>{
                     if(err){
                         console.log(err)
                     }
@@ -215,7 +215,7 @@ io.on('connection', socket => {
     })
 
     //방3 전등 OFF
-    socket.on('light3OnToServer', ()=>{
+    socket.on('light3OffToServer', ()=>{
         const sql="select * from appliances where idx=3"
         DB.query(sql,(err,data)=>{
             if(err){
@@ -255,7 +255,7 @@ io.on('connection', socket => {
     })
 
     //방4 전등 OFF
-    socket.on('light4OnToServer', ()=>{
+    socket.on('light4OffToServer', ()=>{
         const sql="select * from appliances where idx=4"
         DB.query(sql,(err,data)=>{
             if(err){
@@ -336,7 +336,7 @@ io.on('connection', socket => {
     })
 
     //거실 조명 OFF
-    socket.on('livingroomOnToServer', ()=>{
+    socket.on('livingroomOffToServer', ()=>{
         const sql="select * from appliances where idx=6"
         DB.query(sql,(err,data)=>{
             if(err){
@@ -376,7 +376,7 @@ io.on('connection', socket => {
     })
 
     //방1 에어컨 OFF
-    socket.on('room1airOnToServer', ()=>{
+    socket.on('room1airOffToServer', ()=>{
         const sql="select * from appliances where idx=7"
         DB.query(sql,(err,data)=>{
             if(err){
@@ -417,7 +417,7 @@ io.on('connection', socket => {
 
 
     //방2 에어컨 OFF
-    socket.on('room2airOnToServer', ()=>{
+    socket.on('room2airOffToServer', ()=>{
         const sql="select * from appliances where idx=8"
         DB.query(sql,(err,data)=>{
             if(err){
@@ -459,7 +459,7 @@ io.on('connection', socket => {
 
 
     //방3 에어컨 OFF
-    socket.on('room3airOnToServer', ()=>{
+    socket.on('room3airOffToServer', ()=>{
         const sql="select * from appliances where idx=9"
         DB.query(sql,(err,data)=>{
             if(err){
@@ -481,46 +481,6 @@ io.on('connection', socket => {
 
     //공기 청정기 ON
     socket.on('purifierOnToServer', (data)=>{
-        const sql="select * from appliances where idx=10"
-        DB.query(sql,(err,data)=>{
-            if(err){
-                console.log(err)
-            }else{
-                console.log(data)
-                data[0].state=1
-                console.log(data)
-                socket.to(roomName).emit('applianceControl', data);
-                DB.query('update appliances set state=1 where idx=10',(err,data)=>{
-                    if(err){
-                        console.log(err)
-                    }
-                })
-            }
-        })
-    })
-
-    //공기 청정기 OFF
-    socket.on('purifierOffToServer', ()=>{
-        const sql="select * from appliances where idx=10"
-        DB.query(sql,(err,data)=>{
-            if(err){
-                console.log(err)
-            }else{
-                console.log(data)
-                data[0].state=2
-                console.log(data)
-                socket.to(roomName).emit('applianceControl', data);
-                DB.query('update appliances set state=2 where idx=10',(err,data)=>{
-                    if(err){
-                        console.log(err)
-                    }
-                })
-            }
-        })
-    })
-
-    //TV ON
-    socket.on('TVOnToServer', (data)=>{
         const sql="select * from appliances where idx=11"
         DB.query(sql,(err,data)=>{
             if(err){
@@ -539,8 +499,8 @@ io.on('connection', socket => {
         })
     })
 
-    //TV OFF
-    socket.on('TVOffToServer', ()=>{
+    //공기 청정기 OFF
+    socket.on('purifierOffToServer', ()=>{
         const sql="select * from appliances where idx=11"
         DB.query(sql,(err,data)=>{
             if(err){
@@ -559,8 +519,8 @@ io.on('connection', socket => {
         })
     })
 
-    //방1 커튼 ON
-    socket.on('room1curtainOnToServer', (data)=>{
+    //TV ON
+    socket.on('TVOnToServer', (data)=>{
         const sql="select * from appliances where idx=12"
         DB.query(sql,(err,data)=>{
             if(err){
@@ -579,8 +539,8 @@ io.on('connection', socket => {
         })
     })
 
-    //방1 커튼 OFF
-    socket.on('room1curtainOffToServer', ()=>{
+    //TV OFF
+    socket.on('TVOffToServer', ()=>{
         const sql="select * from appliances where idx=12"
         DB.query(sql,(err,data)=>{
             if(err){
@@ -598,9 +558,9 @@ io.on('connection', socket => {
             }
         })
     })
-    
-    //방2 커튼 ON
-    socket.on('room2curtainOnToServer', (data)=>{
+
+    //방1 커튼 ON
+    socket.on('room1curtainOnToServer', (data)=>{
         const sql="select * from appliances where idx=13"
         DB.query(sql,(err,data)=>{
             if(err){
@@ -619,8 +579,8 @@ io.on('connection', socket => {
         })
     })
 
-    //방2 커튼 OFF
-    socket.on('room2curtainOffToServer', ()=>{
+    //방1 커튼 OFF
+    socket.on('room1curtainOffToServer', ()=>{
         const sql="select * from appliances where idx=13"
         DB.query(sql,(err,data)=>{
             if(err){
@@ -638,9 +598,9 @@ io.on('connection', socket => {
             }
         })
     })
-
-    //방3 커튼 ON
-    socket.on('room3curtainOnToServer', (data)=>{
+    
+    //방2 커튼 ON
+    socket.on('room2curtainOnToServer', (data)=>{
         const sql="select * from appliances where idx=14"
         DB.query(sql,(err,data)=>{
             if(err){
@@ -659,9 +619,8 @@ io.on('connection', socket => {
         })
     })
 
-
-    //방3 커튼 OFF
-    socket.on('room3curtainOffToServer', ()=>{
+    //방2 커튼 OFF
+    socket.on('room2curtainOffToServer', ()=>{
         const sql="select * from appliances where idx=14"
         DB.query(sql,(err,data)=>{
             if(err){
@@ -680,8 +639,8 @@ io.on('connection', socket => {
         })
     })
 
-    //거실 커튼 ON
-    socket.on('livingroomcurtainOnToServer', (data)=>{
+    //방3 커튼 ON
+    socket.on('room3curtainOnToServer', (data)=>{
         const sql="select * from appliances where idx=15"
         DB.query(sql,(err,data)=>{
             if(err){
@@ -700,8 +659,9 @@ io.on('connection', socket => {
         })
     })
 
-    //거실 커튼 OFF
-    socket.on('livingroomcurtainOffToServer', ()=>{
+
+    //방3 커튼 OFF
+    socket.on('room3curtainOffToServer', ()=>{
         const sql="select * from appliances where idx=15"
         DB.query(sql,(err,data)=>{
             if(err){
@@ -712,6 +672,46 @@ io.on('connection', socket => {
                 console.log(data)
                 socket.to(roomName).emit('applianceControl', data);
                 DB.query('update appliances set state=2 where idx=15',(err,data)=>{
+                    if(err){
+                        console.log(err)
+                    }
+                })
+            }
+        })
+    })
+
+    //거실 커튼 ON
+    socket.on('livingroomcurtainOnToServer', (data)=>{
+        const sql="select * from appliances where idx=16"
+        DB.query(sql,(err,data)=>{
+            if(err){
+                console.log(err)
+            }else{
+                console.log(data)
+                data[0].state=1
+                console.log(data)
+                socket.to(roomName).emit('applianceControl', data);
+                DB.query('update appliances set state=1 where idx=16',(err,data)=>{
+                    if(err){
+                        console.log(err)
+                    }
+                })
+            }
+        })
+    })
+
+    //거실 커튼 OFF
+    socket.on('livingroomcurtainOffToServer', ()=>{
+        const sql="select * from appliances where idx=16"
+        DB.query(sql,(err,data)=>{
+            if(err){
+                console.log(err)
+            }else{
+                console.log(data)
+                data[0].state=2
+                console.log(data)
+                socket.to(roomName).emit('applianceControl', data);
+                DB.query('update appliances set state=2 where idx=16',(err,data)=>{
                     if(err){
                         console.log(err)
                     }
@@ -842,20 +842,12 @@ io.on('connection', socket => {
     socket.on('PatrolOnToServer', (data) => {
         //security service on~~
         socket.to(roomName).emit('patrolOn',)
-
-        //패트롤 작동한다고 다시 메시지 보내기~
-        socket.to(roomName).emit('sendPatrolStatus', "시큐리티 서비스 작동");
-        console.log('Patrol On!');
     });
 
     socket.on('PatrolOffToServer', (data) => {
         //security service off~
-        socket.to(roomName).emit('patrolOff', data);
-        socket.broadcast.emit('sendPatrolStatus', "dsdfsdssfsfdsfs");
+        socket.to(roomName).emit('patrolOff');
         
-        //패트롤 작동한다고 다시 메시지 보내기~
-        socket.emit('sendPatrolStatus', "시큐리티 서비스 중지");
-        console.log('Patrol Off!');
     });
 
     socket.on('turnleftToServer', (data) => {
@@ -878,7 +870,11 @@ io.on('connection', socket => {
     //터틀봇에서 소지품 찾았다고 연락이 온다~
     socket.on('findBelongingsToServer',(data_socket)=>{
         //먼저 애플리케이션에 알람 보내고~
-        socket.to(roomName).emit('alertToApp',"분실물 발견")
+        const test = {
+            title:"소지품 발견",
+            msg:"분실물 리스트를 확인하세요",
+        }
+        socket.to(roomName).emit('alertToApp',test)
         //디비에 저장
         console.log("터틀봇에게 분실물 찾았다고 왔다~~")
         buffer = Buffer.from(data_socket.photo, "base64");
@@ -921,12 +917,17 @@ io.on('connection', socket => {
     //침입자 발견시
     socket.on('findIntruderToServer',(data_intruder)=>{
         //먼저 애플리케이션에 알람 보내고~
-        socket.to(roomName).emit('alertToApp',"침입자 발견")
+        const test = {
+            title:"침입자 발견",
+            msg:"집에 도둑이 들었어요!",
+        }
+        socket.to(roomName).emit('alertToApp',test)
         //디비에 저장
         buffer = Buffer.from(data_intruder.photo, "base64");
         file_path = path.join(picPath, "./" + data_intruder.datetime.replace(/:/gi, "-") +".jpg")
         fs.writeFileSync(file_path, buffer); // 이미지 파일 resource에 저장
         var intruder_img_path
+        console.log("침입자 발견~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
         const uploadFile = (path) => {
             const fileContent = fs.readFileSync(path) // 파일을 읽어서
             const params = {
@@ -937,14 +938,16 @@ io.on('connection', socket => {
             s3.upload(params, function(err, data_upload) {
                 if (err) {throw err;}
                 console.log('File Uploaded Successfully')
-                console.log(data_upload)
-                intruder_img_path = data_intruder.Location
+                console.log("333333333333333333"+data_upload)
+                console.log("22222222222222222222"+data_upload.Location)
+                intruder_img_path = data_upload.Location
+                console.log("111111111111"+intruder_img_path)
                 const user_no=data_intruder.user_no
                 const photo=intruder_img_path
                 const datetime=data_intruder.datetime
                 console.log(datetime) // 시간 확인
                 const sql='insert into intruders(user_no,photo,datetime) values(?,?,?)'
-                const param=[user_no, photo, datetime]
+                const param=[user_no, data_upload.Location, datetime]
                 DB.query(sql, param, (err, data)=>{
                     if(err){
                         console.log(err)
@@ -970,58 +973,32 @@ io.on('connection', socket => {
             }
         })
 
-
+        var datas=[]
         //모드 번호로 저장된 모드 정보 가져오기
         const sql='select * from mode where no=?'
         DB.query(sql,[mode_no],(err,data)=>{
             if(err){
                 console.log(err)
             }else if(data.length!=0){
-                var time=data[0].time
-                var day=data[0].day
-                var startH=0
-                var startM=0
-                var endH=0
-                var endM=0
-
-                if(time[0]!='0'){
-                    startH=parseInt(time.substring(0,2))
-                }else if(time[0]=='0'){
-                    startH=parseInt(time[1])
+                const length=data[0].iot.length
+                var j=0
+                for(var i=0; i<length; i++){
+                    var tmp={}
+                    DB.query('select * from appliances where idx=?',[i],(err,result)=>{
+                        console.log(i)
+                       tmp={x:result[0].x,y:result[0].y,idx:j++,state:parseInt(data[0].iot.charAt(result[0].idx))}
+                       datas.push(tmp)
+                    })
                 }
-
-                if(time[2]!='0'){
-                    startM=parseInt(time.substring(2,4))
-                }else if(time[2]=='0'){
-                    startM=parseInt(time[3])
-                }
-
-                if(time[4]!='0'){
-                    endH=parseInt(time.substring(4,6))
-                }else if(time[4]=='0'){
-                    endH=parseInt(time[5])
-                }
-
-                if(time[6]!='0'){
-                    endM=parseInt(time.substring(6))
-                }else if(time[6]=='0'){
-                    endM=parseInt(time[7])
-                }
-
-                //일정 시간마다 스케쥴링
-                //키는 시간
-                startMode = schedule.scheduleJob(startM+' '+startH+' * * '+day, function(){
-                    socket.to(roomName).emit('modeStart',data[0].iot)
-                });
-                //끄는 시간
-                endMode = schedule.scheduleJob(endM+' '+endH+' * * '+day, function(){
-                    socket.to(roomName).emit('modeStop',data[0].iot)
-                });
-
+                setTimeout(function(){
+                    socket.to(roomName).emit('applianceControl',datas)  
+                }, 3000);
             }else{
                 console.log("저장된 모드 없음")
             }
         })
+        console.log(datas)
+
 
         
 
