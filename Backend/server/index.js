@@ -927,6 +927,7 @@ io.on('connection', socket => {
         file_path = path.join(picPath, "./" + data_intruder.datetime.replace(/:/gi, "-") +".jpg")
         fs.writeFileSync(file_path, buffer); // 이미지 파일 resource에 저장
         var intruder_img_path
+        console.log("침입자 발견~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
         const uploadFile = (path) => {
             const fileContent = fs.readFileSync(path) // 파일을 읽어서
             const params = {
@@ -937,7 +938,8 @@ io.on('connection', socket => {
             s3.upload(params, function(err, data_upload) {
                 if (err) {throw err;}
                 console.log('File Uploaded Successfully')
-                console.log(data_upload)
+                console.log("333333333333333333"+data_upload)
+                console.log("22222222222222222222"+data_upload.Location)
                 intruder_img_path = data_upload.Location
                 console.log("111111111111"+intruder_img_path)
                 const user_no=data_intruder.user_no
@@ -945,7 +947,7 @@ io.on('connection', socket => {
                 const datetime=data_intruder.datetime
                 console.log(datetime) // 시간 확인
                 const sql='insert into intruders(user_no,photo,datetime) values(?,?,?)'
-                const param=[user_no, photo, datetime]
+                const param=[user_no, data_upload.Location, datetime]
                 DB.query(sql, param, (err, data)=>{
                     if(err){
                         console.log(err)
