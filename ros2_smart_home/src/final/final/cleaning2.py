@@ -95,6 +95,8 @@ class cleaning(Node):
         self.y_min = 0
         self.y_max = 0
 
+        self.goal_comeback = False
+
         self.timer = self.create_timer(time_period, self.timer_callback)
 
     def odom_callback(self, msg):
@@ -224,6 +226,7 @@ class cleaning(Node):
             self.is_grid_update = False
             self.ctrl_cmd = ctrl_cmd
         if ctrl_cmd > 0:
+            self.goal_comeback = False
             self.x_min = x_min
             self.x_max = x_max
             self.y_min = y_min
@@ -286,14 +289,16 @@ class cleaning(Node):
         # 청소 모드가 아닐 때
         else:
             # 기본 위치(충전 장소)
-            goal = PoseStamped()
-            selected_point = self.grid_cell_to_pose([146, 100])
-            goal.pose.position.x = selected_point[0]
-            goal.pose.position.y = selected_point[1]
-            goal.header.frame_id = 'map'
-            goal.pose.orientation.w = 1.0
-            print("복귀!")
-            self.goal_pub.publish(goal)
+            if self.goal_comeback == False:
+                goal = PoseStamped()
+                selected_point = self.grid_cell_to_pose([146, 100])
+                goal.pose.position.x = selected_point[0]
+                goal.pose.position.y = selected_point[1]
+                goal.header.frame_id = 'map'
+                goal.pose.orientation.w = 1.0
+                print("복귀!")
+                self.goal_pub.publish(goal)
+                self.goal_comeback = True
 
 
 def main(args=None):

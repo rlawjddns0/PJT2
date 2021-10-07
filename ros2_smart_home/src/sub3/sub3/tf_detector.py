@@ -165,21 +165,23 @@ def visualize_images(image_out, t_cost):
     cv2.waitKey(1)
 
 
-     
 def img_callback(msg):
 
     global img_bgr
     global origin_img
+    global is_img_bgr
     origin_img = msg.data
-
+    is_img_bgr = True
     np_arr = np.frombuffer(msg.data, np.uint8)
     img_bgr = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
+
 
 
 def scan_callback(msg):
 
     global xyz
-
+    global is_scan
+    is_scan = True
     R = np.array(msg.ranges)
 
     x = R*np.cos(np.linspace(0, 2*np.pi, 360))
@@ -195,8 +197,6 @@ def scan_callback(msg):
 
 def odom_callback(msg):
     global is_odom
-    global odom_msg
-    
     is_odom=True
     odom_msg=msg
 
@@ -206,6 +206,7 @@ def odom_callback(msg):
     odoms = [odom_msg.pose.pose.position.x, odom_msg.pose.pose.position.y]   
 
 def main(args=None):
+
     # 로직 2. pretrained file and label map load    
     ## 우선 스켈레톤 코드는 구글이 이미 학습시켜서 model zoo에 올린, mobilenet v1을 backbone으로 하는 
     ## single shot detector 모델의 pretrained 파라메터인 
@@ -292,6 +293,12 @@ def main(args=None):
 
     global g_node
     global origin_img
+    global is_img_bgr
+    is_img_bgr = False
+    global is_scan
+    global is_status
+    is_status = False
+    is_scan = False
 
     rclpy.init(args=args)
 
@@ -317,6 +324,7 @@ def main(args=None):
 
     iter_step = 0
 
+
     while rclpy.ok():
 
         time.sleep(0.05)
@@ -325,109 +333,109 @@ def main(args=None):
         for _ in range(2):
 
             rclpy.spin_once(g_node)
+        if is_img_bgr and is_scan and is_imu and is_odom:
+            # 로직 10. object detection model inference
+            image_process, infer_time, boxes_detect, scores, classes_pick = ssd_net.inference(img_bgr, category_index)
 
-        # 로직 10. object detection model inference
-        image_process, infer_time, boxes_detect, scores, classes_pick = ssd_net.inference(img_bgr, category_index)
+            # 로직 11. 라이다-카메라 좌표 변환 및 정사영
+            # sub2 에서 ex_calib 에 했던 대로 라이다 포인트들을
+            # 이미지 프레임 안에 정사영시킵니다.
 
-        # 로직 11. 라이다-카메라 좌표 변환 및 정사영
-        # sub2 에서 ex_calib 에 했던 대로 라이다 포인트들을
-        # 이미지 프레임 안에 정사영시킵니다.
+            xyz_p = xyz[np.where(xyz[:, 0]>=0)]
 
-        xyz_p = xyz[np.where(xyz[:, 0]>=0)]
+            xyz_c = l2c_trans.transform_lidar2cam(xyz_p)
 
-        xyz_c = l2c_trans.transform_lidar2cam(xyz_p)
+            xy_i = l2c_trans.project_pts2img(xyz_c, False)
 
-        xy_i = l2c_trans.project_pts2img(xyz_c, False)
+            xyii = np.concatenate([xy_i, xyz_p], axis=1)
 
-        xyii = np.concatenate([xy_i, xyz_p], axis=1)
+            # 로직 12. bounding box 결과 좌표 뽑기
+            ## boxes_detect 안에 들어가 있는 bounding box 결과들을
+            ## 좌상단 x,y와 너비 높이인 w,h 구하고, 
+            ## 본래 이미지 비율에 맞춰서 integer로 만들어
+            ## numpy array로 변환
 
-        # 로직 12. bounding box 결과 좌표 뽑기
-        ## boxes_detect 안에 들어가 있는 bounding box 결과들을
-        ## 좌상단 x,y와 너비 높이인 w,h 구하고, 
-        ## 본래 이미지 비율에 맞춰서 integer로 만들어
-        ## numpy array로 변환
+            if len(boxes_detect) != 0:
 
-        if len(boxes_detect) != 0:
+                ih = img_bgr.shape[0]
+                iw = img_bgr.shape[1]
 
-            ih = img_bgr.shape[0]
-            iw = img_bgr.shape[1]
+                boxes_np = np.array(boxes_detect)
+                # print("boxes_np", boxes_np)
+                # boxes_np [[2.8653672e-01 3.8322806e-04 9.9154472e-01 1.0000000e+00]]
 
-            boxes_np = np.array(boxes_detect)
-            # print("boxes_np", boxes_np)
-            # boxes_np [[2.8653672e-01 3.8322806e-04 9.9154472e-01 1.0000000e+00]]
+                x = boxes_np.T[1]*iw
+                y = boxes_np.T[0]*ih
+                w = (boxes_np.T[3]-boxes_np.T[1])*iw
+                h = (boxes_np.T[2]-boxes_np.T[0])*ih
 
-            x = boxes_np.T[1]*iw
-            y = boxes_np.T[0]*ih
-            w = (boxes_np.T[3]-boxes_np.T[1])*iw
-            h = (boxes_np.T[2]-boxes_np.T[0])*ih
-
-            bbox = np.vstack([
-                x.astype(np.int32).tolist(),
-                y.astype(np.int32).tolist(),
-                w.astype(np.int32).tolist(),
-                h.astype(np.int32).tolist()
-            ]).T
-            # for i in range(len(boxes_detect)):
-            #     # [0.51189506 0.00946438 0.9975513  0.9856086 ] 이런 식
-            #     print(boxes_detect[i])
+                bbox = np.vstack([
+                    x.astype(np.int32).tolist(),
+                    y.astype(np.int32).tolist(),
+                    w.astype(np.int32).tolist(),
+                    h.astype(np.int32).tolist()
+                ]).T
+                # for i in range(len(boxes_detect)):
+                #     # [0.51189506 0.00946438 0.9975513  0.9856086 ] 이런 식
+                #     print(boxes_detect[i])
 
 
 
-            # 로직 13. 인식된 물체의 위치 추정
-            ## bbox가 구해졌으면, bbox 안에 들어가는 라이다 포인트 들을 구하고
-            ## 그걸로 물체의 거리를 추정할 수 있습니다.
-            
-            ostate_list = []
-
-            for i in range(bbox.shape[0]):
-                x = int(bbox[i, 0])
-                y = int(bbox[i, 1])
-                w = int(bbox[i, 2])
-                h = int(bbox[i, 3])
-
-                cx = x + int(w/2)
-                cy = y + int(h/2)
+                # 로직 13. 인식된 물체의 위치 추정
+                ## bbox가 구해졌으면, bbox 안에 들어가는 라이다 포인트 들을 구하고
+                ## 그걸로 물체의 거리를 추정할 수 있습니다.
                 
-                xyv = xyii[np.logical_and(xyii[:, 0]>=cx-0.4*w, xyii[:, 0]<cx+0.4*w), :]
-                xyv = xyv[np.logical_and(xyv[:, 1]>=cy-0.4*h, xyv[:, 1]<cy+0.4*h), :]
-                ## bbox 안에 들어가는 라이다 포인트들의 대표값(예:평균)을 뽑는다
-                ostate = np.median(xyv[:, 2:], axis=0)
+                ostate_list = []
 
-                ## 대표값이 존재하면 
-                if not np.isnan(ostate[0]):
-                    ostate_list.append(ostate)
+                for i in range(bbox.shape[0]):
+                    x = int(bbox[i, 0])
+                    y = int(bbox[i, 1])
+                    w = int(bbox[i, 2])
+                    h = int(bbox[i, 3])
 
-                for _ in ostate_list:
-                    distance = math.sqrt(math.pow(ostate_list[0][0],2)+math.pow(ostate_list[0][1],2))
-                    cv2.putText(image_process,str(distance),(30,200), cv2.FONT_HERSHEY_SIMPLEX, 1,(255,255,255), 2, 0)
-                    if len(cname)>0 and (cname in olist) and cnum>=60 :
-                        if 0 <= olist.index(cname) < 5 and not oflag[olist.index(cname)]:
-                            oflag[olist.index(cname)] = True
-                            print(oflag)
-                            oindex = [ostate_list[0][0]+odoms[0], ostate_list[0][1]+odoms[1]]
-                            print(oindex)
-                            
-                            b64data = base64.b64encode(origin_img)
-                            data = {
-                                "type": olist.index(cname),
-                                "user_no": 1,
-                                "photo": b64data.decode('utf-8'),
-                                "datetime": str(datetime.datetime.now()),
-                                "position": str(oindex[0]) + ',' + str(oindex[1])
-                            }
-                            try:
-                                print("데이터 보냄")
-                                print("datetime: ", data["datetime"])
-                                # print("encode: ", b64data)
-                                # print("decode: ", b64data.decode('utf-8'))
-                                if cname != 'intruder':
-                                    sio.emit("findBelongingsToServer", data)
-                                else:
-                                    sio.emit("findIntruderToServer", data)
-                            except:
-                                print("오류")
-                            # cv2.imwrite("C:/Users/multicampus/Videos/Captures/detected/"+cname+".png", image_process)
-                
+                    cx = x + int(w/2)
+                    cy = y + int(h/2)
+                    
+                    xyv = xyii[np.logical_and(xyii[:, 0]>=cx-0.4*w, xyii[:, 0]<cx+0.4*w), :]
+                    xyv = xyv[np.logical_and(xyv[:, 1]>=cy-0.4*h, xyv[:, 1]<cy+0.4*h), :]
+                    ## bbox 안에 들어가는 라이다 포인트들의 대표값(예:평균)을 뽑는다
+                    ostate = np.median(xyv[:, 2:], axis=0)
+
+                    ## 대표값이 존재하면 
+                    if not np.isnan(ostate[0]):
+                        ostate_list.append(ostate)
+
+                    for _ in ostate_list:
+                        distance = math.sqrt(math.pow(ostate_list[0][0],2)+math.pow(ostate_list[0][1],2))
+                        cv2.putText(image_process,str(distance),(30,200), cv2.FONT_HERSHEY_SIMPLEX, 1,(255,255,255), 2, 0)
+                        if len(cname)>0 and (cname in olist) and cnum>=60 :
+                            if 0 <= olist.index(cname) < 5 and not oflag[olist.index(cname)]:
+                                oflag[olist.index(cname)] = True
+                                print(oflag)
+                                oindex = [ostate_list[0][0]+odoms[0], ostate_list[0][1]+odoms[1]]
+                                print(oindex)
+                                
+                                b64data = base64.b64encode(origin_img)
+                                data = {
+                                    "type": olist.index(cname),
+                                    "user_no": 1,
+                                    "photo": b64data.decode('utf-8'),
+                                    "datetime": str(datetime.datetime.now()),
+                                    "position": str(oindex[0]) + ',' + str(oindex[1])
+                                }
+                                try:
+                                    print("데이터 보냄")
+                                    print("datetime: ", data["datetime"])
+                                    # print("encode: ", b64data)
+                                    # print("decode: ", b64data.decode('utf-8'))
+                                    if cname != 'intruder':
+                                        sio.emit("findBelongingsToServer", data)
+                                    else:
+                                        sio.emit("findIntruderToServer", data)
+                                except:
+                                    print("오류")
+                                # cv2.imwrite("C:/Users/multicampus/Videos/Captures/detected/"+cname+".png", image_process)
+                    
             image_process = draw_pts_img(image_process, xy_i[:, 0].astype(np.int32),
                                             xy_i[:, 1].astype(np.int32))
 

@@ -168,12 +168,12 @@ class followTheCarrot(Node):
                     # 1. normal state(경로를 잘 따라 가는 경우)
                     if self.state == 1:
                         # print("state1")
-                        if 0.2 < abs(theta):
+                        if 0.3 < abs(theta):
                             self.out_vel = 0.0
-                            self.out_rad_vel = theta * 0.30
+                            self.out_rad_vel = theta * 0.35
                         else:
                             self.out_vel = 0.6
-                            self.out_rad_vel = theta * 0.30
+                            self.out_rad_vel = theta * 0.35
                         
                     # 전방 충돌 상황
                     if self.state == 2:
@@ -233,13 +233,13 @@ class followTheCarrot(Node):
                         self.out_rad_vel = 0.0
                         self.back_cnt -= 1
 
-                    # random move for robustness
-                    if random.randint(0, 31) > 29:
-                        self.out_vel = 0.5
-                        self.out_rad_vel = 0.3
-                    elif random.randint(0, 30) < 1:
-                        self.out_vel = -0.5
-                        self.out_rad_vel = -0.3
+                    # # random move for robustness
+                    # if random.randint(0, 31) > 29:
+                    #     self.out_vel = 0.5
+                    #     self.out_rad_vel = 0.3
+                    # elif random.randint(0, 30) < 1:
+                    #     self.out_vel = -0.5
+                    #     self.out_rad_vel = -0.3
 
                     self.cmd_msg.linear.x = self.out_vel
                     self.cmd_msg.angular.z = self.out_rad_vel
@@ -259,12 +259,12 @@ class followTheCarrot(Node):
                     self.out_rad_vel = 0.1
 
                 # random move
-                if random.randint(0, 31) > 28:
-                    self.out_vel = 0.5
-                    self.out_rad_vel = 0.3
-                elif random.randint(0, 30) < 2:
-                    self.out_vel = -0.5
-                    self.out_rad_vel = -0.3
+                # if random.randint(0, 31) > 28:
+                #     self.out_vel = 0.5
+                #     self.out_rad_vel = 0.3
+                # elif random.randint(0, 30) < 2:
+                #     self.out_vel = -0.5
+                #     self.out_rad_vel = -0.3
 
                 self.cmd_msg.linear.x = self.out_vel
                 self.cmd_msg.angular.z = self.out_rad_vel
@@ -335,6 +335,7 @@ class followTheCarrot(Node):
         self.path_msg=msg
         if len(self.path_msg.poses) < 5:
             self.path_exists = False
+            self.is_goal = False
         else:
             self.path_exists = True
 

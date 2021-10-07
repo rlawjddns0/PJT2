@@ -7,6 +7,7 @@ from squaternion import Quaternion
 from nav_msgs.msg import Odometry,Path
 from math import pi,cos,sin,sqrt,atan2
 import numpy as np
+from nav_msgs.msg import Odometry,OccupancyGrid,MapMetaData
 from collections import deque
 from sensor_msgs.msg import LaserScan, PointCloud
 
@@ -28,10 +29,12 @@ ctrl = False
 @sio.on('patrolOn')
 def patrol_on():
     global ctrl
+    print("패트롤모드 온")
     ctrl = True
 
 @sio.on('patrolOff')
 def patrol_off():
+    print("패트롤모드 오프")
     global ctrl
     ctrl = False
 
@@ -84,12 +87,15 @@ class patrol(Node):
         self.stop_cnt = 0 # 터틀봇이 멈춰 있는지 판단하는 간격을 정하기 위한 변수
         self.is_stop = False # 터틀봇의 정지 여부 판단
 
-
+        self.patrol_off_cnt = 0
 
     def timer_callback(self):
         # patrol mode가 켜졌고, a_star로 만들어진 경로가 따로 없을 때 작동(가야 할 좌표가 없을 때)
+        ctrl = get_global_var()
+        print("ctrl command: ", ctrl)
         if ctrl == True and self.is_path != True:
             # 1. 로봇이 멈춰있는지 여부 확인하기
+            self.patrol_off_cnt = 0
             if self.is_status and self.is_odom == True and self.is_stop == True:
                 print("cmd_msg.linear.x: ", self.out_vel)
                 self.out_vel = -0.3
@@ -143,7 +149,13 @@ class patrol(Node):
             self.cmd_pub.publish(self.cmd_msg)
             print(self.stop_cnt)
         else:
-            print("patrol mode off!")
+            if self.patrol_off_cnt == 0:
+                self.cmd_msg.linear.x = 0.0
+                self.cmd_msg.angular.z = 0.0
+                self.cmd_pub.publish(self.cmd_msg)
+                self.patrol_off_cnt += 1
+            else:
+                print("patrol mode off!")
 
             
 
