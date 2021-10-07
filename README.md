@@ -2,7 +2,6 @@
 
 * 시뮬레이터 및 프로젝트 관련 파일 다운로드
   - https://drive.google.com/drive/folders/1rp54qL31ZIoHet7A9BlvpoDCCdGVsvLK?usp=sharing
-
 (위 경로에 위치한 프로그램 및 문서는 SSAFY 과정 내에서만 사용할 수 있으며 무단 복제 및 반출, 배포를 금합니다.)
 
 ## SSAVIS : 내 일을 손쉽게 도울 스마트홈 서비스
@@ -62,5 +61,12 @@ ex. S05P21B202-28 [feat] 오후 sub1 명세서 학습
 
 ![diagram](/uploads/5a057db8e1a108b78de487bd7ee47706/diagram.JPG)
 
+* 포팅 매뉴얼
+  - https://www.notion.so/e442d7d78d4d485eb27e8dd6a18f6dc6
 
+* 시연 동영상
+  1. 가전제어
+  2. 침입 관리
+  3. 분실물 관리
+  4. 청소
 
