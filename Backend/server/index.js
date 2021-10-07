@@ -914,9 +914,6 @@ io.on('connection', socket => {
             })
         }
         uploadFile(file_path)
-        console.log(Location)
-        
-        console.log("fsljfa;" + flag)
 
     })
 
@@ -936,16 +933,17 @@ io.on('connection', socket => {
                 Key: data.datetime.replace(/:/gi, "-") +".jpg",
                 Body: fileContent
             }
-            s3.upload(params, function(err, data) {
+            s3.upload(params, function(err, data_intruder) {
                 if (err) {throw err;}
                 console.log('File Uploaded Successfully')
-                intruder_img_path = data.Location
-                const user_no=data.user_no
+                print(data_intruder)
+                intruder_img_path = data_intruder.Location
+                const user_no=data_intruder.user_no
                 const photo=intruder_img_path
-                const datetime=data.datetime
+                const datetime=data_intruder.datetime
                 const sql='insert into intruders(user_no,photo,datetime) values(?,?,?)'
                 const param=[user_no, photo, datetime]
-                DB.query(sql, param, (err, data)=>{
+                DB.query(sql, param, (err, data_intruder)=>{
                     if(err){
                         console.log(err)
                     }
