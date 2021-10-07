@@ -309,7 +309,7 @@ def main(args=None):
     
 
     oflag = [False]*5
-    olist = ['intruder'. 'bag', 'key', 'wallet', 'remote controller']
+    olist = ['intruder', 'bag', 'key', 'wallet', 'remote controller']
     # 로직 8. lidar2img 좌표 변환 클래스 정의
     # sub2의 좌표 변환 클래스를 가져와서 정의. sub2.ex_calib에서 다 가져왔음
 

@@ -902,6 +902,7 @@ io.on('connection', socket => {
                 const photo=Location
                 const flag= true
                 const datetime=data_socket.datetime
+                console.log(datetime) // 시간 확인
                 const position=data_socket.position
                 const sql='insert into belongings(type, user_no, photo, flag, datetime, position) values(?,?,?,?,?,?)'
                 const param=[type, user_no, photo, flag, datetime, position]
@@ -941,6 +942,7 @@ io.on('connection', socket => {
                 const user_no=data_intruder.user_no
                 const photo=intruder_img_path
                 const datetime=data_intruder.datetime
+                console.log(datetime) // 시간 확인
                 const sql='insert into intruders(user_no,photo,datetime) values(?,?,?)'
                 const param=[user_no, photo, datetime]
                 DB.query(sql, param, (err, data)=>{
