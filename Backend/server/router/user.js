@@ -18,6 +18,7 @@ const io = require('socket.io')(server)
 
 var fs = require('fs'); // required for file serving
 const { application } = require('express');
+const { json } = require('body-parser');
 
 
 
@@ -119,6 +120,55 @@ router.post('/register',function(req,res){
     })
     
 
+
+})
+
+
+router.post('/test',function(req,res){
+    const mode_no=req.body.mode_no
+    const user_no=req.body.user_no
+    console.log("test~")
+    var datas=[]
+        //모드 번호로 저장된 모드 정보 가져오기
+        const sql='select * from mode where no=?'
+        DB.query(sql,[mode_no],(err,data)=>{
+            if(err){
+                console.log(err)
+            }else if(data.length!=0){
+                const length=data[0].iot.length
+                console.log(length)
+                for(var i=0; i<length; i++){
+                    var tmp={}
+                    
+                    DB.query('select * from appliances where idx=?',[i],(err,result)=>{
+                        // console.log(result[0].x)
+                    //    tmp["des_x"]=result[0].x
+                    //    tmp["des_y"]=result[0].y
+                    //    tmp["target_num"]=i
+                    //    tmp["target+status"]=list[i]
+                       tmp={des_x:result[0].x,des_y:result[0].y,target_num:i,target_status:data[0].iot.charAt(result[0].idx)}
+                    //    console.log(tmp)
+                       datas.push(tmp)
+
+                    })
+                    
+                    
+                    
+                }
+                setTimeout(function(){
+                        return res.status(200).json({
+                            datas
+                        })
+                        }
+                    
+                    , 3000);
+                
+
+            }else{
+                console.log("저장된 모드 없음")
+            }
+        })
+        console.log(datas)
 
 })
 

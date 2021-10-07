@@ -973,58 +973,30 @@ io.on('connection', socket => {
             }
         })
 
-
+        var datas=[]
         //모드 번호로 저장된 모드 정보 가져오기
         const sql='select * from mode where no=?'
         DB.query(sql,[mode_no],(err,data)=>{
             if(err){
                 console.log(err)
             }else if(data.length!=0){
-                var time=data[0].time
-                var day=data[0].day
-                var startH=0
-                var startM=0
-                var endH=0
-                var endM=0
-
-                if(time[0]!='0'){
-                    startH=parseInt(time.substring(0,2))
-                }else if(time[0]=='0'){
-                    startH=parseInt(time[1])
+                const length=data[0].iot.length
+                for(var i=0; i<length; i++){
+                    var tmp={}
+                    DB.query('select * from appliances where idx=?',[i],(err,result)=>{
+                       tmp={des_x:result[0].x,des_y:result[0].y,target_num:i,target_status:data[0].iot.charAt(result[0].idx)}
+                       datas.push(tmp)
+                    })
                 }
-
-                if(time[2]!='0'){
-                    startM=parseInt(time.substring(2,4))
-                }else if(time[2]=='0'){
-                    startM=parseInt(time[3])
-                }
-
-                if(time[4]!='0'){
-                    endH=parseInt(time.substring(4,6))
-                }else if(time[4]=='0'){
-                    endH=parseInt(time[5])
-                }
-
-                if(time[6]!='0'){
-                    endM=parseInt(time.substring(6))
-                }else if(time[6]=='0'){
-                    endM=parseInt(time[7])
-                }
-
-                //일정 시간마다 스케쥴링
-                //키는 시간
-                startMode = schedule.scheduleJob(startM+' '+startH+' * * '+day, function(){
-                    socket.to(roomName).emit('modeStart',data[0].iot)
-                });
-                //끄는 시간
-                endMode = schedule.scheduleJob(endM+' '+endH+' * * '+day, function(){
-                    socket.to(roomName).emit('modeStop',data[0].iot)
-                });
-
+                setTimeout(function(){
+                    socket.to(roomName).emit('applianceControl',datas)  
+                }, 3000);
             }else{
                 console.log("저장된 모드 없음")
             }
         })
+        console.log(datas)
+
 
         
 
