@@ -936,14 +936,14 @@ io.on('connection', socket => {
             s3.upload(params, function(err, data_intruder) {
                 if (err) {throw err;}
                 console.log('File Uploaded Successfully')
-                print(data_intruder)
+                console.log(data_intruder)
                 intruder_img_path = data_intruder.Location
                 const user_no=data_intruder.user_no
                 const photo=intruder_img_path
                 const datetime=data_intruder.datetime
                 const sql='insert into intruders(user_no,photo,datetime) values(?,?,?)'
                 const param=[user_no, photo, datetime]
-                DB.query(sql, param, (err, data_intruder)=>{
+                DB.query(sql, param, (err, data)=>{
                     if(err){
                         console.log(err)
                     }
