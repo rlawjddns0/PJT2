@@ -938,7 +938,7 @@ io.on('connection', socket => {
                 if (err) {throw err;}
                 console.log('File Uploaded Successfully')
                 console.log(data_upload)
-                intruder_img_path = data_intruder.Location
+                intruder_img_path = data_upload.Location
                 console.log("111111111111"+intruder_img_path)
                 const user_no=data_intruder.user_no
                 const photo=intruder_img_path
