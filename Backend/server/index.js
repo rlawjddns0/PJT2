@@ -981,11 +981,12 @@ io.on('connection', socket => {
                 console.log(err)
             }else if(data.length!=0){
                 const length=data[0].iot.length
+                var j=0
                 for(var i=0; i<length; i++){
                     var tmp={}
                     DB.query('select * from appliances where idx=?',[i],(err,result)=>{
                         console.log(i)
-                       tmp={des_x:result[0].x,des_y:result[0].y,target_num:i,target_status:data[0].iot.charAt(result[0].idx)}
+                       tmp={des_x:result[0].x,des_y:result[0].y,target_num:j++,target_status:data[0].iot.charAt(result[0].idx)}
                        datas.push(tmp)
                     })
                 }
