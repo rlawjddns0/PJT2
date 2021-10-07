@@ -870,7 +870,11 @@ io.on('connection', socket => {
     //터틀봇에서 소지품 찾았다고 연락이 온다~
     socket.on('findBelongingsToServer',(data_socket)=>{
         //먼저 애플리케이션에 알람 보내고~
-        socket.to(roomName).emit('alertToApp',"분실물 발견")
+        const test = {
+            title:"소지품 발견",
+            msg:"소지품 발견",
+        }
+        socket.to(roomName).emit('alertToApp',test)
         //디비에 저장
         console.log("터틀봇에게 분실물 찾았다고 왔다~~")
         buffer = Buffer.from(data_socket.photo, "base64");
@@ -913,7 +917,11 @@ io.on('connection', socket => {
     //침입자 발견시
     socket.on('findIntruderToServer',(data_intruder)=>{
         //먼저 애플리케이션에 알람 보내고~
-        socket.to(roomName).emit('alertToApp',"침입자 발견")
+        const test = {
+            title:"침입자 발견",
+            msg:"침입자 발견",
+        }
+        socket.to(roomName).emit('alertToApp',test)
         //디비에 저장
         buffer = Buffer.from(data_intruder.photo, "base64");
         file_path = path.join(picPath, "./" + data_intruder.datetime.replace(/:/gi, "-") +".jpg")
