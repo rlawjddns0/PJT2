@@ -939,6 +939,7 @@ io.on('connection', socket => {
                 console.log('File Uploaded Successfully')
                 console.log(data_upload)
                 intruder_img_path = data_intruder.Location
+                console.log("111111111111"+intruder_img_path)
                 const user_no=data_intruder.user_no
                 const photo=intruder_img_path
                 const datetime=data_intruder.datetime

@@ -37,11 +37,11 @@ router.get('/list/:user_no',function(req,res){
 })
 
 //찾은 분실물 체크
-router.put('/check/:no',function(req,res){
+router.delete('/check/:no',function(req,res){
     //분실물 번호
     const no=req.params.no
     //no값의 분실물 찾았다고 flag값 true로 바꾼다.
-    DB.query('delete belongings where no=?',[true,no],
+    DB.query('delete belongings where no=?',[no],
     (err,data)=>{
         if(err)console.log(err)
         if(data.length>0){
