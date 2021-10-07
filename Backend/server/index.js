@@ -117,7 +117,7 @@ io.on('connection', socket => {
     })
     // 방1 불 켜기
     socket.on('light1OnToServer', ()=>{
-        const sql="select * from appliances where idx=7"
+        const sql="select * from appliances where idx=1"
         DB.query(sql,(err,data)=>{
             if(err){
                 console.log(err)
@@ -126,7 +126,7 @@ io.on('connection', socket => {
                 data[0].state=1
                 console.log(data)
                 socket.to(roomName).emit('applianceControl', data);
-                DB.query('update appliances set state=1 where idx=7',(err,data)=>{
+                DB.query('update appliances set state=1 where idx=1',(err,data)=>{
                     if(err){
                         console.log(err)
                     }
@@ -136,7 +136,7 @@ io.on('connection', socket => {
     })
     // 방1 불 끄기
     socket.on('light1OffToServer', ()=>{
-        const sql="select * from appliances where idx=7"
+        const sql="select * from appliances where idx=1"
         DB.query(sql,(err,data)=>{
             if(err){
                 console.log(err)
@@ -145,7 +145,7 @@ io.on('connection', socket => {
                 data[0].state=2
                 console.log(data)
                 socket.to(roomName).emit('applianceControl', data);
-                DB.query('update appliances set state=2 where idx=7',(err,data)=>{
+                DB.query('update appliances set state=2 where idx=1',(err,data)=>{
                     if(err){
                         console.log(err)
                     }
@@ -481,46 +481,6 @@ io.on('connection', socket => {
 
     //공기 청정기 ON
     socket.on('purifierOnToServer', (data)=>{
-        const sql="select * from appliances where idx=10"
-        DB.query(sql,(err,data)=>{
-            if(err){
-                console.log(err)
-            }else{
-                console.log(data)
-                data[0].state=1
-                console.log(data)
-                socket.to(roomName).emit('applianceControl', data);
-                DB.query('update appliances set state=1 where idx=10',(err,data)=>{
-                    if(err){
-                        console.log(err)
-                    }
-                })
-            }
-        })
-    })
-
-    //공기 청정기 OFF
-    socket.on('purifierOffToServer', ()=>{
-        const sql="select * from appliances where idx=10"
-        DB.query(sql,(err,data)=>{
-            if(err){
-                console.log(err)
-            }else{
-                console.log(data)
-                data[0].state=2
-                console.log(data)
-                socket.to(roomName).emit('applianceControl', data);
-                DB.query('update appliances set state=2 where idx=10',(err,data)=>{
-                    if(err){
-                        console.log(err)
-                    }
-                })
-            }
-        })
-    })
-
-    //TV ON
-    socket.on('TVOnToServer', (data)=>{
         const sql="select * from appliances where idx=11"
         DB.query(sql,(err,data)=>{
             if(err){
@@ -539,8 +499,8 @@ io.on('connection', socket => {
         })
     })
 
-    //TV OFF
-    socket.on('TVOffToServer', ()=>{
+    //공기 청정기 OFF
+    socket.on('purifierOffToServer', ()=>{
         const sql="select * from appliances where idx=11"
         DB.query(sql,(err,data)=>{
             if(err){
@@ -559,8 +519,8 @@ io.on('connection', socket => {
         })
     })
 
-    //방1 커튼 ON
-    socket.on('room1curtainOnToServer', (data)=>{
+    //TV ON
+    socket.on('TVOnToServer', (data)=>{
         const sql="select * from appliances where idx=12"
         DB.query(sql,(err,data)=>{
             if(err){
@@ -579,8 +539,8 @@ io.on('connection', socket => {
         })
     })
 
-    //방1 커튼 OFF
-    socket.on('room1curtainOffToServer', ()=>{
+    //TV OFF
+    socket.on('TVOffToServer', ()=>{
         const sql="select * from appliances where idx=12"
         DB.query(sql,(err,data)=>{
             if(err){
@@ -598,9 +558,9 @@ io.on('connection', socket => {
             }
         })
     })
-    
-    //방2 커튼 ON
-    socket.on('room2curtainOnToServer', (data)=>{
+
+    //방1 커튼 ON
+    socket.on('room1curtainOnToServer', (data)=>{
         const sql="select * from appliances where idx=13"
         DB.query(sql,(err,data)=>{
             if(err){
@@ -619,8 +579,8 @@ io.on('connection', socket => {
         })
     })
 
-    //방2 커튼 OFF
-    socket.on('room2curtainOffToServer', ()=>{
+    //방1 커튼 OFF
+    socket.on('room1curtainOffToServer', ()=>{
         const sql="select * from appliances where idx=13"
         DB.query(sql,(err,data)=>{
             if(err){
@@ -638,9 +598,9 @@ io.on('connection', socket => {
             }
         })
     })
-
-    //방3 커튼 ON
-    socket.on('room3curtainOnToServer', (data)=>{
+    
+    //방2 커튼 ON
+    socket.on('room2curtainOnToServer', (data)=>{
         const sql="select * from appliances where idx=14"
         DB.query(sql,(err,data)=>{
             if(err){
@@ -659,9 +619,8 @@ io.on('connection', socket => {
         })
     })
 
-
-    //방3 커튼 OFF
-    socket.on('room3curtainOffToServer', ()=>{
+    //방2 커튼 OFF
+    socket.on('room2curtainOffToServer', ()=>{
         const sql="select * from appliances where idx=14"
         DB.query(sql,(err,data)=>{
             if(err){
@@ -680,8 +639,8 @@ io.on('connection', socket => {
         })
     })
 
-    //거실 커튼 ON
-    socket.on('livingroomcurtainOnToServer', (data)=>{
+    //방3 커튼 ON
+    socket.on('room3curtainOnToServer', (data)=>{
         const sql="select * from appliances where idx=15"
         DB.query(sql,(err,data)=>{
             if(err){
@@ -700,8 +659,9 @@ io.on('connection', socket => {
         })
     })
 
-    //거실 커튼 OFF
-    socket.on('livingroomcurtainOffToServer', ()=>{
+
+    //방3 커튼 OFF
+    socket.on('room3curtainOffToServer', ()=>{
         const sql="select * from appliances where idx=15"
         DB.query(sql,(err,data)=>{
             if(err){
@@ -712,6 +672,46 @@ io.on('connection', socket => {
                 console.log(data)
                 socket.to(roomName).emit('applianceControl', data);
                 DB.query('update appliances set state=2 where idx=15',(err,data)=>{
+                    if(err){
+                        console.log(err)
+                    }
+                })
+            }
+        })
+    })
+
+    //거실 커튼 ON
+    socket.on('livingroomcurtainOnToServer', (data)=>{
+        const sql="select * from appliances where idx=16"
+        DB.query(sql,(err,data)=>{
+            if(err){
+                console.log(err)
+            }else{
+                console.log(data)
+                data[0].state=1
+                console.log(data)
+                socket.to(roomName).emit('applianceControl', data);
+                DB.query('update appliances set state=1 where idx=16',(err,data)=>{
+                    if(err){
+                        console.log(err)
+                    }
+                })
+            }
+        })
+    })
+
+    //거실 커튼 OFF
+    socket.on('livingroomcurtainOffToServer', ()=>{
+        const sql="select * from appliances where idx=16"
+        DB.query(sql,(err,data)=>{
+            if(err){
+                console.log(err)
+            }else{
+                console.log(data)
+                data[0].state=2
+                console.log(data)
+                socket.to(roomName).emit('applianceControl', data);
+                DB.query('update appliances set state=2 where idx=16',(err,data)=>{
                     if(err){
                         console.log(err)
                     }
