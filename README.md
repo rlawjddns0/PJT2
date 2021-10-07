@@ -80,3 +80,10 @@ ex. S05P21B202-28 [feat] 오후 sub1 명세서 학습
   4. 청소
 
      ![전체청소](README.assets/전체청소.gif)
+
+
+
+
+
+[UCC 링크](https://drive.google.com/file/d/1f27RoF6yLidbldMMoYDzPb3-xSRdz99s/view)
+

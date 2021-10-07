@@ -294,10 +294,10 @@ def main(args=None):
     global g_node
     global origin_img
     global is_img_bgr
-    is_img_bgr = False
     global is_scan
-    global is_status
-    is_status = False
+    global is_odom
+    is_odom = False
+    is_img_bgr = False
     is_scan = False
 
     rclpy.init(args=args)
@@ -333,7 +333,7 @@ def main(args=None):
         for _ in range(2):
 
             rclpy.spin_once(g_node)
-        if is_img_bgr and is_scan and is_imu and is_odom:
+        if is_img_bgr and is_scan and is_odom:
             # 로직 10. object detection model inference
             image_process, infer_time, boxes_detect, scores, classes_pick = ssd_net.inference(img_bgr, category_index)
 
@@ -440,7 +440,7 @@ def main(args=None):
                                             xy_i[:, 1].astype(np.int32))
 
 
-        visualize_images(image_process, infer_time)
+            visualize_images(image_process, infer_time)
 
     g_node.destroy_node()
     rclpy.shutdown()
