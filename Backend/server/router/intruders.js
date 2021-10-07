@@ -23,7 +23,7 @@ const { application } = require('express');
 //침입 관리 기록 리스트 가져오기
 router.get('/list/:user_no',function(req,res){
     const user_no=req.params.user_no
-    const sql='select * from intruders where user_no=? and type=0'
+    const sql='select * from intruders where user_no=?'
     const param=[user_no]
 
     DB.query(sql,param,(err,data)=>{
