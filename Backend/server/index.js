@@ -872,7 +872,7 @@ io.on('connection', socket => {
         //먼저 애플리케이션에 알람 보내고~
         const test = {
             title:"소지품 발견",
-            msg:"소지품 발견",
+            msg:"분실물 리스트를 확인하세요",
         }
         socket.to(roomName).emit('alertToApp',test)
         //디비에 저장
@@ -919,7 +919,7 @@ io.on('connection', socket => {
         //먼저 애플리케이션에 알람 보내고~
         const test = {
             title:"침입자 발견",
-            msg:"침입자 발견",
+            msg:"집에 도둑이 들었어요!",
         }
         socket.to(roomName).emit('alertToApp',test)
         //디비에 저장
