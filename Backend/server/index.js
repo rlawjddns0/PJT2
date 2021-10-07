@@ -842,20 +842,12 @@ io.on('connection', socket => {
     socket.on('PatrolOnToServer', (data) => {
         //security service on~~
         socket.to(roomName).emit('patrolOn',)
-
-        //패트롤 작동한다고 다시 메시지 보내기~
-        socket.to(roomName).emit('sendPatrolStatus', "시큐리티 서비스 작동");
-        console.log('Patrol On!');
     });
 
     socket.on('PatrolOffToServer', (data) => {
         //security service off~
         socket.to(roomName).emit('patrolOff', data);
-        socket.broadcast.emit('sendPatrolStatus', "dsdfsdssfsfdsfs");
         
-        //패트롤 작동한다고 다시 메시지 보내기~
-        socket.emit('sendPatrolStatus', "시큐리티 서비스 중지");
-        console.log('Patrol Off!');
     });
 
     socket.on('turnleftToServer', (data) => {
