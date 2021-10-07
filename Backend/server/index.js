@@ -215,7 +215,7 @@ io.on('connection', socket => {
     })
 
     //방3 전등 OFF
-    socket.on('light3OnToServer', ()=>{
+    socket.on('light3OffToServer', ()=>{
         const sql="select * from appliances where idx=3"
         DB.query(sql,(err,data)=>{
             if(err){
@@ -255,7 +255,7 @@ io.on('connection', socket => {
     })
 
     //방4 전등 OFF
-    socket.on('light4OnToServer', ()=>{
+    socket.on('light4OffToServer', ()=>{
         const sql="select * from appliances where idx=4"
         DB.query(sql,(err,data)=>{
             if(err){
@@ -336,7 +336,7 @@ io.on('connection', socket => {
     })
 
     //거실 조명 OFF
-    socket.on('livingroomOnToServer', ()=>{
+    socket.on('livingroomOffToServer', ()=>{
         const sql="select * from appliances where idx=6"
         DB.query(sql,(err,data)=>{
             if(err){
@@ -376,7 +376,7 @@ io.on('connection', socket => {
     })
 
     //방1 에어컨 OFF
-    socket.on('room1airOnToServer', ()=>{
+    socket.on('room1airOffToServer', ()=>{
         const sql="select * from appliances where idx=7"
         DB.query(sql,(err,data)=>{
             if(err){
@@ -417,7 +417,7 @@ io.on('connection', socket => {
 
 
     //방2 에어컨 OFF
-    socket.on('room2airOnToServer', ()=>{
+    socket.on('room2airOffToServer', ()=>{
         const sql="select * from appliances where idx=8"
         DB.query(sql,(err,data)=>{
             if(err){
@@ -459,7 +459,7 @@ io.on('connection', socket => {
 
 
     //방3 에어컨 OFF
-    socket.on('room3airOnToServer', ()=>{
+    socket.on('room3airOffToServer', ()=>{
         const sql="select * from appliances where idx=9"
         DB.query(sql,(err,data)=>{
             if(err){
