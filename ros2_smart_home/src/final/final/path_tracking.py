@@ -172,7 +172,7 @@ class followTheCarrot(Node):
                             self.out_vel = 0.0
                             self.out_rad_vel = theta * 0.35
                         else:
-                            self.out_vel = 0.6
+                            self.out_vel = 0.5
                             self.out_rad_vel = theta * 0.35
                         
                     # 전방 충돌 상황
@@ -221,7 +221,7 @@ class followTheCarrot(Node):
                             self.turn_flag = False
                     # 직진
                     if self.state == 6 and self.go_cnt > 0:
-                        self.out_vel = 1.0
+                        self.out_vel = 0.5
                         self.out_rad_vel = 0.0
                         self.go_cnt -= 1
                         if self.go_cnt == 0:
