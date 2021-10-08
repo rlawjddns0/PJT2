@@ -1,0 +1,21 @@
+item { id: 1 name: 'bag' }
+
+item { id: 2 name: 'bed' }
+
+item { id: 3 name: 'bed table' }
+
+item { id: 4 name: 'chair' }
+
+item { id: 5 name: 'dog' }
+
+item { id: 6 name: 'intruder' }
+
+item { id: 7 name: 'key' }
+
+item { id: 8 name: 'pot' }
+
+item { id: 9 name: 'remote controller' }
+
+item { id: 10 name: 'table' }
+
+item { id: 11 name: 'wallet' }
